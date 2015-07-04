@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>com.code-disaster</groupId>
+  <artifactId>gdx-snippets-natives</artifactId>
+  <version>1.0.0</version>
+  <packaging>pom</packaging>
+  <name>libGDX lazy snippets - native libraries</name>
+
+  <profiles>
+    <profile>
+      <id>win64</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>com.coderplus.maven.plugins</groupId>
+            <artifactId>copy-rename-maven-plugin</artifactId>
+            <version>1.0</version>
+            <executions>
+              <execution>
+                <id>copy-file</id>
+                <phase>validate</phase>
+                <goals>
+                  <goal>copy</goal>
+                </goals>
+                <configuration>
+                  <fileSets>
+                    <fileSet>
+                      <sourceFile>../fips-deploy/gdx-snippets-native/win64-vs2013-release/gdx-snippets-native.dll</sourceFile>
+                      <destinationFile>../../resources/gdx-snippets64.dll</destinationFile>
+                    </fileSet>
+                  </fileSets>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+
+    <profile>
+      <id>osx</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>com.coderplus.maven.plugins</groupId>
+            <artifactId>copy-rename-maven-plugin</artifactId>
+            <version>1.0</version>
+            <executions>
+              <execution>
+                <id>copy-file</id>
+                <phase>validate</phase>
+                <goals>
+                  <goal>copy</goal>
+                </goals>
+                <configuration>
+                  <fileSets>
+                    <fileSet>
+                      <sourceFile>../fips-deploy/gdx-snippets-native/osx-xcode-release/libgdx-snippets-native.dylib</sourceFile>
+                      <destinationFile>../../resources/libgdx-ext64.dylib</destinationFile>
+                    </fileSet>
+                  </fileSets>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
+
+</project>

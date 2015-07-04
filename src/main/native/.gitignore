@@ -1,0 +1,8 @@
+# fips output
+fips-build/
+fips-deploy/
+jni/.fips-*
+
+# generated files
+jni/generated/*.cpp
+jni/generated/*.h
