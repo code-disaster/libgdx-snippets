@@ -12,7 +12,7 @@
 
   <profiles>
     <profile>
-      <id>win64</id>
+      <id>win64-vs2013</id>
       <build>
         <plugins>
           <plugin>
@@ -42,7 +42,7 @@
     </profile>
 
     <profile>
-      <id>osx</id>
+      <id>osx-xcode</id>
       <build>
         <plugins>
           <plugin>
