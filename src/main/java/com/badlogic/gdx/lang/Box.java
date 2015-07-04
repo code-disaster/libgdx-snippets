@@ -15,7 +15,7 @@ package com.badlogic.gdx.lang;
  *
  * @param <T> Type of the boxed value.
  */
-public final class Box<T> {
+public class Box<T> {
 
 	@FunctionalInterface
 	public interface Assign<T> {
