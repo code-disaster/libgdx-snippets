@@ -2,6 +2,9 @@ package com.badlogic.gdx.utils;
 
 public class GdxSnippetsNativesLoader {
 
+	/**
+	 * Loads the native library, and initializes the flextGL OpenGL bindings.
+	 */
 	public static synchronized void load() {
 
 		try {

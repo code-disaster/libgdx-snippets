@@ -33,14 +33,14 @@ This library uses the [fips](http://floooh.github.io/fips/) cmake build wrapper 
 
 **The root folder for the native code is located in ```[libgdx-snippets]/src/main/native/jni/```.**
 
-```
+```shell
 # navigate to the native source folder
 > cd [libgdx-snippets]/src/main/native/jni/
 ```
 
 **To install fips plus dependencies (one-time):**
 
-```
+```shell
 # this will install fips
 > ./fips
 run 'fips help' for more info
@@ -54,7 +54,7 @@ run 'fips help' for more info
 
 **To select the build target (one-time):**
 
-```
+```shell
 # [optional] list all configs known to fips
 > ./fips list configs
 
@@ -67,7 +67,7 @@ run 'fips help' for more info
 
 **To compile the native library:**
 
-```
+```shell
 # [optional] clean output
 > ./fips clean all
 
@@ -79,7 +79,7 @@ run 'fips help' for more info
 
 **To copy the compiled runtime library:**
 
-```
+```shell
 # e.g. for Windows 64 bit
 > mvn install -Pwin64-vs2013
 
