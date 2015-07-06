@@ -28,6 +28,10 @@ fips_begin_sharedlib(gdx-snippets-native)
         fips_libs(OpenGL32)
     endif()
 
+    if (FIPS_OSX)
+        fips_frameworks_osx(OpenGL)
+    endif()
+
 fips_end_sharedlib()
 
 fips_finish()
