@@ -60,7 +60,37 @@
                   <fileSets>
                     <fileSet>
                       <sourceFile>../fips-deploy/gdx-snippets-native/osx-xcode-release/libgdx-snippets-native.dylib</sourceFile>
-                      <destinationFile>../../resources/libgdx-ext64.dylib</destinationFile>
+                      <destinationFile>../../resources/libgdx-snippets.dylib</destinationFile>
+                    </fileSet>
+                  </fileSets>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+
+    <profile>
+      <id>linux-make</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>com.coderplus.maven.plugins</groupId>
+            <artifactId>copy-rename-maven-plugin</artifactId>
+            <version>1.0</version>
+            <executions>
+              <execution>
+                <id>copy-file</id>
+                <phase>validate</phase>
+                <goals>
+                  <goal>copy</goal>
+                </goals>
+                <configuration>
+                  <fileSets>
+                    <fileSet>
+                      <sourceFile>../fips-deploy/gdx-snippets-native/linux-make-release/libgdx-snippets-native.so</sourceFile>
+                      <destinationFile>../../resources/libgdx-snippets.so</destinationFile>
                     </fileSet>
                   </fileSets>
                 </configuration>
