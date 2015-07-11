@@ -72,7 +72,7 @@
     </profile>
 
     <profile>
-      <id>linux-make</id>
+      <id>linux64-make</id>
       <build>
         <plugins>
           <plugin>
@@ -90,7 +90,7 @@
                   <fileSets>
                     <fileSet>
                       <sourceFile>../fips-deploy/gdx-snippets-native/linux-make-release/libgdx-snippets-native.so</sourceFile>
-                      <destinationFile>../../resources/libgdx-snippets.so</destinationFile>
+                      <destinationFile>../../resources/libgdx-snippets64.so</destinationFile>
                     </fileSet>
                   </fileSets>
                 </configuration>
