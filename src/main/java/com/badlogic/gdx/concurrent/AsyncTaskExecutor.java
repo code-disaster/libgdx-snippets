@@ -2,21 +2,25 @@ package com.badlogic.gdx.concurrent;
 
 import com.badlogic.gdx.utils.Disposable;
 
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
+/**
+ * A wrapper to {@link ExecutorService} which executes {@link AsyncTask} tasks.
+ */
 public class AsyncTaskExecutor implements Disposable {
 
 	private ExecutorService service;
 
 	public AsyncTaskExecutor(int threadCount) {
 
+		threadCount = Math.max(threadCount, 1);
+		System.out.println("Starting AsyncTaskExecutor with " + threadCount + " threads.");
+
 		if (threadCount <= 1) {
-			service = Executors.newSingleThreadExecutor();
+			service = Executors.newSingleThreadExecutor(new Factory("AsyncTask-Single-"));
 		} else {
-			service = Executors.newFixedThreadPool(threadCount);
+			service = Executors.newFixedThreadPool(threadCount, new Factory("AsyncTask-Pool-"));
 		}
 	}
 
@@ -29,6 +33,7 @@ public class AsyncTaskExecutor implements Disposable {
 	public void dispose() {
 
 		service.shutdown();
+		System.out.println("Shutting down AsyncTaskExecutor");
 
 		try {
 			service.awaitTermination(2500, TimeUnit.MILLISECONDS);
@@ -36,4 +41,24 @@ public class AsyncTaskExecutor implements Disposable {
 			e.printStackTrace();
 		}
 	}
+
+	private static class Factory implements ThreadFactory {
+
+		private final ThreadGroup group;
+		private final AtomicInteger threadNumber = new AtomicInteger(1);
+		private final String namePrefix;
+
+		Factory(String prefix) {
+			group = Thread.currentThread().getThreadGroup();
+			namePrefix = prefix;
+		}
+
+		@Override
+		public Thread newThread(Runnable runnable) {
+			Thread thread = new Thread(group, runnable, namePrefix + threadNumber.getAndIncrement());
+			thread.setDaemon(true);
+			return thread;
+		}
+	}
+
 }

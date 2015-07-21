@@ -8,9 +8,15 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
- * A wrapper for {@link FutureTask} with additional properties.
+ * A reentrant wrapper to {@link FutureTask}, with some additional properties to synchronize its result with the
+ * calling thread.
+ * <p>
+ * The task is (re-)scheduled for asynchronous execution with {@link AsyncTask#execute(ExecutorService)}.
+ * <p>
+ * Upon completion, result of the asynchronous computation is cached. It can then be read or polled by the calling
+ * thread via {@link AsyncTask#get()} or {@link AsyncTask#poll(CompletionHandler)}.
  */
-public class AsyncTask<R extends Callable<R>> {
+public abstract class AsyncTask<R extends Callable<R>> {
 
 	public interface CompletionHandler<R extends Callable<R>> {
 		void run(R callable);
@@ -41,31 +47,64 @@ public class AsyncTask<R extends Callable<R>> {
 		return state.get() == State.DONE;
 	}
 
+	/**
+	 * This function blocks until the asynchronous task has been completed, if one is pending.
+	 */
 	public void await() {
 		while (isPending()) {
 			Thread.yield();
 		}
 	}
 
-	public void poll(CompletionHandler<R> completionHandler) {
+	/**
+	 * Non-blocking retrieval of the task result. If the result is available, the provided completion handler is called.
+	 * This is only done once, so subsequent calls to this function won't trigger the handler again.
+	 * <p>
+	 * This is a convenience function similar to:
+	 * <pre>
+	 * if (isDone() && [result_not_retrieved_before]) {
+	 *     R result = get();
+	 *     completionHandler.run(result);
+	 * }
+	 * </pre>
+	 *
+	 * @return true if result of the task has been retrieved.
+	 */
+	public boolean poll(CompletionHandler<R> completionHandler) {
 		if (state.get() == State.DONE) {
 			if (resultAvailable.compareAndSet(true, false)) {
 				R r = get();
 				if (r != null) {
-					completionHandler.run(get());
+					completionHandler.run(r);
+					return true;
 				}
 			}
 		}
+		return false;
 	}
 
+	/**
+	 * Non-blocking retrieval of the task result. Throws an exception if the result is not available yet, or has been
+	 * retrieved already.
+	 * <p>
+	 * To prevent this from happening, callers should use {@link AsyncTask#isDone()} before calling this function.
+	 *
+	 * @throws IllegalStateException if no valid result is available.
+	 */
 	public R get() {
 		if (state.get() != State.DONE) {
 			throw new IllegalStateException("Illegal state!");
 		}
 		state.compareAndSet(State.DONE, State.READY);
+		resultAvailable.compareAndSet(true, false);
 		return result.get();
 	}
 
+	/**
+	 * Queue the task for execution by the given {@link ExecutorService}.
+	 *
+	 * @throws IllegalStateException if the task is not ready yet, after it has been scheduled previously.
+	 */
 	void execute(ExecutorService service) {
 
 		if (state.get() == State.PENDING) {
@@ -83,6 +122,13 @@ public class AsyncTask<R extends Callable<R>> {
 
 		// pass to executor service
 		service.execute(new Task(callable));
+	}
+
+	/**
+	 * Called by {@link FutureTask#done()} in scope of executor thread.
+	 */
+	public void done() {
+
 	}
 
 	private class Task extends FutureTask<R> {
@@ -105,6 +151,7 @@ public class AsyncTask<R extends Callable<R>> {
 					throw new RuntimeException("Invalid result state!");
 				}
 
+				AsyncTask.this.done();
 
 			} catch (InterruptedException | ExecutionException e) {
 				throw new IllegalStateException(e);
