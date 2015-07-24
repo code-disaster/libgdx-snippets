@@ -3,7 +3,7 @@
 A collection of code snippets for the lazy [libGDX](https://github.com/libgdx/libgdx) user.
 
 - Aimed for desktop projects, so the code won't run on HTML5 and mobile.
-- Is written/compiled with JDK 8, and uses Java 1.8 language features.
+- Written/compiled with JDK 8, and uses Java 1.8 language features.
 - Invades the ```com.badlogic.gdx.*``` namespace.
 - Embeds a small native library for some utility functions.
 - No external dependencies (besides libGDX, of course).
@@ -29,7 +29,9 @@ This is a Maven project. Just use ```mvn package``` or ```mvn install``` to crea
 
 ### Native libraries
 
-This library uses the [fips](http://floooh.github.io/fips/) cmake build wrapper to compile the native source code. Please read the [list of requirements](http://floooh.github.io/fips/getstarted.html) to run fips. The steps below should work on every target system. You only need to specify a different build target.
+This library uses the [fips](http://floooh.github.io/fips/) cmake build wrapper to compile the native source code. Please read the [list of requirements](http://floooh.github.io/fips/getstarted.html) to run fips (in short: Python 2.7.9, cmake 2.8.11+, and an appropriate C++ compiler environment). In addition, Maven and Java are required for the [fips-jni](https://github.com/code-disaster/fips-jni) module.
+
+The steps below should work on every target system. You only need to specify a different build target.
 
 **The root folder for the native code is located in ```[libgdx-snippets]/src/main/native/jni/```.**
 
@@ -43,7 +45,6 @@ This library uses the [fips](http://floooh.github.io/fips/) cmake build wrapper 
 ```shell
 # this will install fips
 > ./fips
-run 'fips help' for more info
 
 # fetch dependencies
 > ./fips fetch
