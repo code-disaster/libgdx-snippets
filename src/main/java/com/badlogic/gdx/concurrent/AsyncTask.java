@@ -6,15 +6,12 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 
 /**
  * A wrapper for {@link FutureTask} with additional properties.
  */
 public class AsyncTask<R extends Callable<R>> {
-
-	public interface CompletionHandler<R extends Callable<R>> {
-		void run(R callable);
-	}
 
 	private enum State {
 		READY,
@@ -47,12 +44,12 @@ public class AsyncTask<R extends Callable<R>> {
 		}
 	}
 
-	public void poll(CompletionHandler<R> completionHandler) {
+	public void poll(Consumer<R> completionHandler) {
 		if (state.get() == State.DONE) {
 			if (resultAvailable.compareAndSet(true, false)) {
 				R r = get();
 				if (r != null) {
-					completionHandler.run(get());
+					completionHandler.accept(get());
 				}
 			}
 		}
