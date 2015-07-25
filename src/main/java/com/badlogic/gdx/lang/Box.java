@@ -1,5 +1,7 @@
 package com.badlogic.gdx.lang;
 
+import java.util.function.Supplier;
+
 /**
  * Utility class to box a typed value. Primarily meant for capturing non-final variables for use in lambda functions.
  *
@@ -17,19 +19,14 @@ package com.badlogic.gdx.lang;
  */
 public class Box<T> {
 
-	@FunctionalInterface
-	public interface Assign<T> {
-		T value();
-	}
-
 	public T value;
 
 	public Box() {
 
 	}
 
-	public Box(Assign<T> initialValue) {
-		value = initialValue.value();
+	public Box(Supplier<T> initialValue) {
+		value = initialValue.get();
 	}
 
 }

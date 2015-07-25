@@ -1,3 +1,7 @@
+# IntelliJ IDEA
 .idea/
-target/
 *.iml
+
+# Maven
+target/
+*.properties

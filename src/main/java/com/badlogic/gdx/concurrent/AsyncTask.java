@@ -6,6 +6,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 
 /**
  * A reentrant wrapper to {@link FutureTask}, with some additional properties to synchronize its result with the
@@ -17,10 +18,6 @@ import java.util.concurrent.atomic.AtomicReference;
  * thread via {@link AsyncTask#get()} or {@link AsyncTask#poll(CompletionHandler)}.
  */
 public abstract class AsyncTask<R extends Callable<R>> {
-
-	public interface CompletionHandler<R extends Callable<R>> {
-		void run(R callable);
-	}
 
 	private enum State {
 		READY,
@@ -70,17 +67,15 @@ public abstract class AsyncTask<R extends Callable<R>> {
 	 *
 	 * @return true if result of the task has been retrieved.
 	 */
-	public boolean poll(CompletionHandler<R> completionHandler) {
+	public void poll(Consumer<R> completionHandler) {
 		if (state.get() == State.DONE) {
 			if (resultAvailable.compareAndSet(true, false)) {
 				R r = get();
 				if (r != null) {
-					completionHandler.run(r);
-					return true;
+					completionHandler.accept(get());
 				}
 			}
 		}
-		return false;
 	}
 
 	/**
