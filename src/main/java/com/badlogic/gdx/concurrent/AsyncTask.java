@@ -67,15 +67,17 @@ public abstract class AsyncTask<R extends Callable<R>> {
 	 *
 	 * @return true if result of the task has been retrieved.
 	 */
-	public void poll(Consumer<R> completionHandler) {
+	public boolean poll(Consumer<R> completionHandler) {
 		if (state.get() == State.DONE) {
 			if (resultAvailable.compareAndSet(true, false)) {
 				R r = get();
 				if (r != null) {
-					completionHandler.accept(get());
+					completionHandler.accept(r);
+					return true;
 				}
 			}
 		}
+		return false;
 	}
 
 	/**
