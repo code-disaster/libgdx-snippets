@@ -15,7 +15,7 @@ import java.util.function.Consumer;
  * The task is (re-)scheduled for asynchronous execution with {@link AsyncTask#execute(ExecutorService)}.
  * <p>
  * Upon completion, result of the asynchronous computation is cached. It can then be read or polled by the calling
- * thread via {@link AsyncTask#get()} or {@link AsyncTask#poll(CompletionHandler)}.
+ * thread via {@link AsyncTask#get()} or {@link AsyncTask#poll(Consumer)}.
  */
 public abstract class AsyncTask<R extends Callable<R>> {
 
