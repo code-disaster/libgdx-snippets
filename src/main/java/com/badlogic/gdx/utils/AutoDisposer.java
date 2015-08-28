@@ -24,6 +24,12 @@ public class AutoDisposer {
 
 	public static void dispose(Object object) {
 
+		// allows to be called on null objects
+
+		if(object == null) {
+			return;
+		}
+
 		Class<?> classType = object.getClass();
 
 		Field[] fields = ClassReflection.getDeclaredFields(classType);
