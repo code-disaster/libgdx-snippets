@@ -10,44 +10,69 @@ import java.util.Iterator;
 public class ArrayUtils {
 
 	/**
-	 * Returns an {@link Iterable} interface wrapped around an array.
+	 * Returns an {@link Iterable} interface wrapped around an array, in ascending order.
+	 */
+	public static <T> Iterable<T> asIterable(T[] array) {
+		return asIterable(array, false);
+	}
+
+	/**
+	 * Returns an {@link Iterable} interface wrapped around an array, in ascending or descending order.
 	 *
 	 * <pre>
 	 * {@code
 	 * Object[] someArray = ...;
-	 * ArrayUtils.asIterable(someArray).forEach(element -> {});
+	 * ArrayUtils.asIterable(someArray, false).forEach(element -> {});
 	 * }
 	 * </pre>
 	 */
-	public static <T> Iterable<T> asIterable(T[] array) {
-		return () -> new ArrayIterator<>(array);
+	public static <T> Iterable<T> asIterable(T[] array, boolean descending) {
+		return () -> descending ? new DescendingArrayIterator<>(array) : new ArrayIterator<>(array);
+	}
+
+	/**
+	 * Returns a second interface to the {@link Iterable} passed, in ascending order.
+	 */
+	@SuppressWarnings("unchecked")
+	public static <T> Iterable<T> asIterable(Iterable<T> iterable) {
+		return asIterable(iterable, false);
 	}
 
 	/**
 	 * Returns a second interface to the {@link Iterable} passed.
 	 * <p>
 	 * The argument must be the result of a previous call to this function, or to
-	 * {@link ArrayUtils#asIterable(Object[])}.
+	 * {@link ArrayUtils#asIterable(Object[], boolean)}.
 	 */
 	@SuppressWarnings("unchecked")
-	public static <T> Iterable<T> asIterable(Iterable<T> iterable) {
+	public static <T> Iterable<T> asIterable(Iterable<T> iterable, boolean descending) {
 		if (iterable instanceof ArrayIterator<?>) {
-			return () -> new ArrayIterator<>((ArrayIterator<T>) iterable);
+			return () -> descending
+					? new DescendingArrayIterator<>((AbstractArrayIterator<T>) iterable)
+					: new ArrayIterator<>((AbstractArrayIterator<T>) iterable);
 		}
 		throw new IllegalArgumentException("Iterable must be of equal type.");
 	}
 
-	private static class ArrayIterator<T> implements Iterator<T> {
+	private abstract static class AbstractArrayIterator<T> implements Iterator<T> {
 
-		private final T[] array;
-		private int index = 0;
+		protected final T[] array;
+		protected int index = 0;
 
-		ArrayIterator(T[] array) {
+		AbstractArrayIterator(T[] array) {
 			this.array = array;
 		}
 
-		ArrayIterator(ArrayIterator<T> other) {
-			this.array = other.array;
+	}
+
+	private static class ArrayIterator<T> extends AbstractArrayIterator<T> {
+
+		ArrayIterator(T[] array) {
+			super(array);
+		}
+
+		ArrayIterator(AbstractArrayIterator<T> other) {
+			super(other.array);
 		}
 
 		@Override
@@ -58,6 +83,29 @@ public class ArrayUtils {
 		@Override
 		public T next() {
 			return array[index++];
+		}
+	}
+
+	private static class DescendingArrayIterator<T> extends AbstractArrayIterator<T> {
+
+		DescendingArrayIterator(T[] array) {
+			super(array);
+			index = array.length - 1;
+		}
+
+		DescendingArrayIterator(AbstractArrayIterator<T> other) {
+			super(other.array);
+			index = other.array.length - 1;
+		}
+
+		@Override
+		public boolean hasNext() {
+			return index >= 0;
+		}
+
+		@Override
+		public T next() {
+			return array[index--];
 		}
 	}
 

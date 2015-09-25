@@ -1,9 +1,11 @@
 package com.badlogic.gdx.utils;
 
+import com.badlogic.gdx.Gdx;
+
 public class GdxSnippetsNativesLoader {
 
 	/**
-	 * Loads the native library, and initializes the flextGL OpenGL bindings.
+	 * Loads the native library, and (optionally) initializes the flextGL OpenGL bindings.
 	 */
 	public static synchronized void load(boolean setupGLBindings) {
 
@@ -28,6 +30,11 @@ public class GdxSnippetsNativesLoader {
 			// initialize flextGL bindings
 
 			if (setupGLBindings) {
+
+				if (!Gdx.graphics.isGL30Available()) {
+					throw new RuntimeException("Custom OpenGL bindings are available for Gdx.gl30 only!");
+				}
+
 				flextInit();
 			}
 
