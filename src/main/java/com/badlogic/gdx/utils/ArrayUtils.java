@@ -3,11 +3,21 @@ package com.badlogic.gdx.utils;
 import java.util.AbstractCollection;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.function.Consumer;
 
 /**
  * Array utility functions.
  */
 public class ArrayUtils {
+
+	/**
+	 * Convenience function to iterate an array.
+	 */
+	public static <T> void forEach(T[] array, Consumer<T> action) {
+		for (T t : array) {
+			action.accept(t);
+		}
+	}
 
 	/**
 	 * Returns an {@link Iterable} interface wrapped around an array, in ascending order.
