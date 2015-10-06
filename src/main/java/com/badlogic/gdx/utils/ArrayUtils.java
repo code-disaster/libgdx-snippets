@@ -1,12 +1,13 @@
 package com.badlogic.gdx.utils;
 
-import java.util.AbstractCollection;
-import java.util.Collection;
-import java.util.Iterator;
+import java.util.*;
 import java.util.function.Consumer;
 
 /**
  * Array utility functions.
+ * <p>
+ * Note: The functions to modify arrays are mostly written for convenience, not for efficiency. They should not be
+ * used in code sensitive to memory consumption or execution speed.
  */
 public class ArrayUtils {
 
@@ -17,6 +18,66 @@ public class ArrayUtils {
 		for (T t : array) {
 			action.accept(t);
 		}
+	}
+
+	/**
+	 * Appends an element to a copy of the given array.
+	 */
+	public static <T> T[] append(T[] array, T element) {
+		int len = array.length;
+		array = Arrays.copyOf(array, len + 1);
+		array[len] = element;
+		return array;
+	}
+
+	/**
+	 * Returns a copy of the given array, with the element at the given index removed.
+	 * <p>
+	 * This version moves the last array element to the removed element's position.
+	 */
+	public static <T> T[] removeIndex(T[] array, int index) {
+		return removeIndex(array, index, false);
+	}
+
+	/**
+	 * Returns a copy of the given array, with the element at the given index removed.
+	 */
+	public static <T> T[] removeIndex(T[] array, int index, boolean keepOrder) {
+
+		if (index != array.length - 1) {
+			if (keepOrder) {
+				System.arraycopy(array, index + 1, array, index, array.length - 2 - index);
+			} else {
+				array[index] = array[array.length - 1];
+			}
+		}
+
+		return Arrays.copyOf(array, array.length - 1);
+	}
+
+	/**
+	 * Expands an existing two-dimensional array.
+	 * <p>
+	 * This is a very memory-inefficient operation.
+	 */
+	@SuppressWarnings("unchecked")
+	public static <T> T[][] expand(T[][] arrayOfArray, Class<T> clazz,
+								   int lowerDim0, int upperDim0, int lowerDim1, int upperDim1) {
+
+		int columns = arrayOfArray.length + lowerDim0 + upperDim0;
+		int rows = arrayOfArray[0].length + lowerDim1 + upperDim1;
+
+		Object copy = java.lang.reflect.Array.newInstance(clazz, columns, rows);
+
+		T[][] dest = (T[][]) copy;
+
+		for (int i = lowerDim0; i < columns - upperDim0; i++) {
+			for (int j = lowerDim1; j < rows - upperDim1; j++) {
+				dest[i][j] = arrayOfArray[i - lowerDim0][j - lowerDim1];
+			}
+		}
+
+		return dest;
 	}
 
 	/**
