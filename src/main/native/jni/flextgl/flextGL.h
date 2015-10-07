@@ -722,6 +722,22 @@ typedef void (APIENTRY *GLDEBUGPROCARB)(GLenum source,GLenum type,GLuint id,GLen
 #define GL_COLOR_ATTACHMENT13 0x8CED
 #define GL_COLOR_ATTACHMENT14 0x8CEE
 #define GL_COLOR_ATTACHMENT15 0x8CEF
+#define GL_COLOR_ATTACHMENT16 0x8CF0
+#define GL_COLOR_ATTACHMENT17 0x8CF1
+#define GL_COLOR_ATTACHMENT18 0x8CF2
+#define GL_COLOR_ATTACHMENT19 0x8CF3
+#define GL_COLOR_ATTACHMENT20 0x8CF4
+#define GL_COLOR_ATTACHMENT21 0x8CF5
+#define GL_COLOR_ATTACHMENT22 0x8CF6
+#define GL_COLOR_ATTACHMENT23 0x8CF7
+#define GL_COLOR_ATTACHMENT24 0x8CF8
+#define GL_COLOR_ATTACHMENT25 0x8CF9
+#define GL_COLOR_ATTACHMENT26 0x8CFA
+#define GL_COLOR_ATTACHMENT27 0x8CFB
+#define GL_COLOR_ATTACHMENT28 0x8CFC
+#define GL_COLOR_ATTACHMENT29 0x8CFD
+#define GL_COLOR_ATTACHMENT30 0x8CFE
+#define GL_COLOR_ATTACHMENT31 0x8CFF
 #define GL_DEPTH_ATTACHMENT 0x8D00
 #define GL_STENCIL_ATTACHMENT 0x8D20
 #define GL_FRAMEBUFFER 0x8D40
@@ -908,25 +924,6 @@ typedef void (APIENTRY *GLDEBUGPROCARB)(GLenum source,GLenum type,GLuint id,GLen
 #define GL_MAX_DEPTH_TEXTURE_SAMPLES 0x910F
 #define GL_MAX_INTEGER_SAMPLES 0x9110
 
-/* GL_VERSION_3_3 */
-
-#define GL_VERTEX_ATTRIB_ARRAY_DIVISOR 0x88FE
-#define GL_SRC1_COLOR 0x88F9
-#define GL_ONE_MINUS_SRC1_COLOR 0x88FA
-#define GL_ONE_MINUS_SRC1_ALPHA 0x88FB
-#define GL_MAX_DUAL_SOURCE_DRAW_BUFFERS 0x88FC
-#define GL_ANY_SAMPLES_PASSED 0x8C2F
-#define GL_SAMPLER_BINDING 0x8919
-#define GL_RGB10_A2UI 0x906F
-#define GL_TEXTURE_SWIZZLE_R 0x8E42
-#define GL_TEXTURE_SWIZZLE_G 0x8E43
-#define GL_TEXTURE_SWIZZLE_B 0x8E44
-#define GL_TEXTURE_SWIZZLE_A 0x8E45
-#define GL_TEXTURE_SWIZZLE_RGBA 0x8E46
-#define GL_TIME_ELAPSED 0x88BF
-#define GL_TIMESTAMP 0x8E28
-#define GL_INT_2_10_10_10_REV 0x8D9F
-
 /* GL_ARB_debug_output */
 
 #define GL_DEBUG_OUTPUT_SYNCHRONOUS_ARB 0x8242
@@ -952,6 +949,10 @@ typedef void (APIENTRY *GLDEBUGPROCARB)(GLenum source,GLenum type,GLuint id,GLen
 #define GL_DEBUG_SEVERITY_MEDIUM_ARB 0x9147
 #define GL_DEBUG_SEVERITY_LOW_ARB 0x9148
 
+/* GL_ARB_internalformat_query */
+
+#define GL_NUM_SAMPLE_COUNTS 0x9380
+
 /* --------------------------- FUNCTION PROTOTYPES --------------------------- */
 
 
@@ -971,6 +972,15 @@ GLAPI PFNGLGETDEBUGMESSAGELOGARB_PROC *glpfGetDebugMessageLogARB;
 #define glDebugMessageControlARB glpfDebugMessageControlARB
 #define glDebugMessageInsertARB glpfDebugMessageInsertARB
 #define glGetDebugMessageLogARB glpfGetDebugMessageLogARB
+
+
+/* GL_ARB_internalformat_query */
+
+typedef void (APIENTRY PFNGLGETINTERNALFORMATIV_PROC (GLenum target, GLenum internalformat, GLenum pname, GLsizei bufSize, GLint * params));
+
+GLAPI PFNGLGETINTERNALFORMATIV_PROC *glpfGetInternalformativ;
+
+#define glGetInternalformativ glpfGetInternalformativ
 
 
 /* GL_VERSION_1_0 */
@@ -1861,99 +1871,10 @@ GLAPI PFNGLWAITSYNC_PROC *glpfWaitSync;
 #define glWaitSync glpfWaitSync
 
 
-/* GL_VERSION_3_3 */
-
-typedef void (APIENTRY PFNGLBINDFRAGDATALOCATIONINDEXED_PROC (GLuint program, GLuint colorNumber, GLuint index, const GLchar * name));
-typedef void (APIENTRY PFNGLBINDSAMPLER_PROC (GLuint unit, GLuint sampler));
-typedef void (APIENTRY PFNGLDELETESAMPLERS_PROC (GLsizei count, const GLuint * samplers));
-typedef void (APIENTRY PFNGLGENSAMPLERS_PROC (GLsizei count, GLuint * samplers));
-typedef GLint (APIENTRY PFNGLGETFRAGDATAINDEX_PROC (GLuint program, const GLchar * name));
-typedef void (APIENTRY PFNGLGETQUERYOBJECTI64V_PROC (GLuint id, GLenum pname, GLint64 * params));
-typedef void (APIENTRY PFNGLGETQUERYOBJECTUI64V_PROC (GLuint id, GLenum pname, GLuint64 * params));
-typedef void (APIENTRY PFNGLGETSAMPLERPARAMETERIIV_PROC (GLuint sampler, GLenum pname, GLint * params));
-typedef void (APIENTRY PFNGLGETSAMPLERPARAMETERIUIV_PROC (GLuint sampler, GLenum pname, GLuint * params));
-typedef void (APIENTRY PFNGLGETSAMPLERPARAMETERFV_PROC (GLuint sampler, GLenum pname, GLfloat * params));
-typedef void (APIENTRY PFNGLGETSAMPLERPARAMETERIV_PROC (GLuint sampler, GLenum pname, GLint * params));
-typedef GLboolean (APIENTRY PFNGLISSAMPLER_PROC (GLuint sampler));
-typedef void (APIENTRY PFNGLQUERYCOUNTER_PROC (GLuint id, GLenum target));
-typedef void (APIENTRY PFNGLSAMPLERPARAMETERIIV_PROC (GLuint sampler, GLenum pname, const GLint * param));
-typedef void (APIENTRY PFNGLSAMPLERPARAMETERIUIV_PROC (GLuint sampler, GLenum pname, const GLuint * param));
-typedef void (APIENTRY PFNGLSAMPLERPARAMETERF_PROC (GLuint sampler, GLenum pname, GLfloat param));
-typedef void (APIENTRY PFNGLSAMPLERPARAMETERFV_PROC (GLuint sampler, GLenum pname, const GLfloat * param));
-typedef void (APIENTRY PFNGLSAMPLERPARAMETERI_PROC (GLuint sampler, GLenum pname, GLint param));
-typedef void (APIENTRY PFNGLSAMPLERPARAMETERIV_PROC (GLuint sampler, GLenum pname, const GLint * param));
-typedef void (APIENTRY PFNGLVERTEXATTRIBDIVISOR_PROC (GLuint index, GLuint divisor));
-typedef void (APIENTRY PFNGLVERTEXATTRIBP1UI_PROC (GLuint index, GLenum type, GLboolean normalized, GLuint value));
-typedef void (APIENTRY PFNGLVERTEXATTRIBP1UIV_PROC (GLuint index, GLenum type, GLboolean normalized, const GLuint * value));
-typedef void (APIENTRY PFNGLVERTEXATTRIBP2UI_PROC (GLuint index, GLenum type, GLboolean normalized, GLuint value));
-typedef void (APIENTRY PFNGLVERTEXATTRIBP2UIV_PROC (GLuint index, GLenum type, GLboolean normalized, const GLuint * value));
-typedef void (APIENTRY PFNGLVERTEXATTRIBP3UI_PROC (GLuint index, GLenum type, GLboolean normalized, GLuint value));
-typedef void (APIENTRY PFNGLVERTEXATTRIBP3UIV_PROC (GLuint index, GLenum type, GLboolean normalized, const GLuint * value));
-typedef void (APIENTRY PFNGLVERTEXATTRIBP4UI_PROC (GLuint index, GLenum type, GLboolean normalized, GLuint value));
-typedef void (APIENTRY PFNGLVERTEXATTRIBP4UIV_PROC (GLuint index, GLenum type, GLboolean normalized, const GLuint * value));
-
-GLAPI PFNGLBINDFRAGDATALOCATIONINDEXED_PROC *glpfBindFragDataLocationIndexed;
-GLAPI PFNGLBINDSAMPLER_PROC *glpfBindSampler;
-GLAPI PFNGLDELETESAMPLERS_PROC *glpfDeleteSamplers;
-GLAPI PFNGLGENSAMPLERS_PROC *glpfGenSamplers;
-GLAPI PFNGLGETFRAGDATAINDEX_PROC *glpfGetFragDataIndex;
-GLAPI PFNGLGETQUERYOBJECTI64V_PROC *glpfGetQueryObjecti64v;
-GLAPI PFNGLGETQUERYOBJECTUI64V_PROC *glpfGetQueryObjectui64v;
-GLAPI PFNGLGETSAMPLERPARAMETERIIV_PROC *glpfGetSamplerParameterIiv;
-GLAPI PFNGLGETSAMPLERPARAMETERIUIV_PROC *glpfGetSamplerParameterIuiv;
-GLAPI PFNGLGETSAMPLERPARAMETERFV_PROC *glpfGetSamplerParameterfv;
-GLAPI PFNGLGETSAMPLERPARAMETERIV_PROC *glpfGetSamplerParameteriv;
-GLAPI PFNGLISSAMPLER_PROC *glpfIsSampler;
-GLAPI PFNGLQUERYCOUNTER_PROC *glpfQueryCounter;
-GLAPI PFNGLSAMPLERPARAMETERIIV_PROC *glpfSamplerParameterIiv;
-GLAPI PFNGLSAMPLERPARAMETERIUIV_PROC *glpfSamplerParameterIuiv;
-GLAPI PFNGLSAMPLERPARAMETERF_PROC *glpfSamplerParameterf;
-GLAPI PFNGLSAMPLERPARAMETERFV_PROC *glpfSamplerParameterfv;
-GLAPI PFNGLSAMPLERPARAMETERI_PROC *glpfSamplerParameteri;
-GLAPI PFNGLSAMPLERPARAMETERIV_PROC *glpfSamplerParameteriv;
-GLAPI PFNGLVERTEXATTRIBDIVISOR_PROC *glpfVertexAttribDivisor;
-GLAPI PFNGLVERTEXATTRIBP1UI_PROC *glpfVertexAttribP1ui;
-GLAPI PFNGLVERTEXATTRIBP1UIV_PROC *glpfVertexAttribP1uiv;
-GLAPI PFNGLVERTEXATTRIBP2UI_PROC *glpfVertexAttribP2ui;
-GLAPI PFNGLVERTEXATTRIBP2UIV_PROC *glpfVertexAttribP2uiv;
-GLAPI PFNGLVERTEXATTRIBP3UI_PROC *glpfVertexAttribP3ui;
-GLAPI PFNGLVERTEXATTRIBP3UIV_PROC *glpfVertexAttribP3uiv;
-GLAPI PFNGLVERTEXATTRIBP4UI_PROC *glpfVertexAttribP4ui;
-GLAPI PFNGLVERTEXATTRIBP4UIV_PROC *glpfVertexAttribP4uiv;
-
-#define glBindFragDataLocationIndexed glpfBindFragDataLocationIndexed
-#define glBindSampler glpfBindSampler
-#define glDeleteSamplers glpfDeleteSamplers
-#define glGenSamplers glpfGenSamplers
-#define glGetFragDataIndex glpfGetFragDataIndex
-#define glGetQueryObjecti64v glpfGetQueryObjecti64v
-#define glGetQueryObjectui64v glpfGetQueryObjectui64v
-#define glGetSamplerParameterIiv glpfGetSamplerParameterIiv
-#define glGetSamplerParameterIuiv glpfGetSamplerParameterIuiv
-#define glGetSamplerParameterfv glpfGetSamplerParameterfv
-#define glGetSamplerParameteriv glpfGetSamplerParameteriv
-#define glIsSampler glpfIsSampler
-#define glQueryCounter glpfQueryCounter
-#define glSamplerParameterIiv glpfSamplerParameterIiv
-#define glSamplerParameterIuiv glpfSamplerParameterIuiv
-#define glSamplerParameterf glpfSamplerParameterf
-#define glSamplerParameterfv glpfSamplerParameterfv
-#define glSamplerParameteri glpfSamplerParameteri
-#define glSamplerParameteriv glpfSamplerParameteriv
-#define glVertexAttribDivisor glpfVertexAttribDivisor
-#define glVertexAttribP1ui glpfVertexAttribP1ui
-#define glVertexAttribP1uiv glpfVertexAttribP1uiv
-#define glVertexAttribP2ui glpfVertexAttribP2ui
-#define glVertexAttribP2uiv glpfVertexAttribP2uiv
-#define glVertexAttribP3ui glpfVertexAttribP3ui
-#define glVertexAttribP3uiv glpfVertexAttribP3uiv
-#define glVertexAttribP4ui glpfVertexAttribP4ui
-#define glVertexAttribP4uiv glpfVertexAttribP4uiv
-
-
 /* --------------------------- CATEGORY DEFINES ------------------------------ */
 
 #define GL_ARB_debug_output
+#define GL_ARB_internalformat_query
 #define GL_VERSION_1_0
 #define GL_VERSION_1_1
 #define GL_VERSION_1_2
@@ -1965,16 +1886,16 @@ GLAPI PFNGLVERTEXATTRIBP4UIV_PROC *glpfVertexAttribP4uiv;
 #define GL_VERSION_3_0
 #define GL_VERSION_3_1
 #define GL_VERSION_3_2
-#define GL_VERSION_3_3
 
 /* ---------------------- Flags for optional extensions ---------------------- */
 
 extern int FLEXT_ARB_debug_output;
+extern int FLEXT_ARB_internalformat_query;
 
 int flextInit(void);
 
 #define FLEXT_MAJOR_VERSION 3
-#define FLEXT_MINOR_VERSION 3
+#define FLEXT_MINOR_VERSION 2
 #define FLEXT_CORE_PROFILE 1
 
 #ifdef __cplusplus
