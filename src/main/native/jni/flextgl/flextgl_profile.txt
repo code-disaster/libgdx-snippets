@@ -3,4 +3,4 @@
 #
 version 3.2 core
 extension ARB_debug_output optional
-extension ARB_internalformat_query optional
+extension ARB_internalformat_query2 optional

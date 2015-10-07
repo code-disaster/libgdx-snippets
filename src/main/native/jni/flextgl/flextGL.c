@@ -89,9 +89,9 @@ void flextLoadOpenGLFunctions(void)
     glpfGetDebugMessageLogARB = (PFNGLGETDEBUGMESSAGELOGARB_PROC*)get_proc("glGetDebugMessageLogARB");
 
 
-    /* GL_ARB_internalformat_query */
+    /* GL_ARB_internalformat_query2 */
 
-    glpfGetInternalformativ = (PFNGLGETINTERNALFORMATIV_PROC*)get_proc("glGetInternalformativ");
+    glpfGetInternalformati64v = (PFNGLGETINTERNALFORMATI64V_PROC*)get_proc("glGetInternalformati64v");
 
 
     /* GL_VERSION_1_2 */
@@ -389,7 +389,7 @@ void flextLoadOpenGLFunctions(void)
 
 /* ----------------------- Extension flag definitions ---------------------- */
 int FLEXT_ARB_debug_output = GL_FALSE;
-int FLEXT_ARB_internalformat_query = GL_FALSE;
+int FLEXT_ARB_internalformat_query2 = GL_FALSE;
 
 /* ---------------------- Function pointer definitions --------------------- */
 
@@ -400,9 +400,9 @@ PFNGLDEBUGMESSAGECONTROLARB_PROC* glpfDebugMessageControlARB = NULL;
 PFNGLDEBUGMESSAGEINSERTARB_PROC* glpfDebugMessageInsertARB = NULL;
 PFNGLGETDEBUGMESSAGELOGARB_PROC* glpfGetDebugMessageLogARB = NULL;
 
-/* GL_ARB_internalformat_query */
+/* GL_ARB_internalformat_query2 */
 
-PFNGLGETINTERNALFORMATIV_PROC* glpfGetInternalformativ = NULL;
+PFNGLGETINTERNALFORMATI64V_PROC* glpfGetInternalformati64v = NULL;
 
 /* GL_VERSION_1_2 */
 
@@ -693,8 +693,8 @@ static void add_extension(const char* extension)
     if (strcmp("GL_ARB_debug_output", extension) == 0) {
         FLEXT_ARB_debug_output = GL_TRUE;
     }
-    if (strcmp("GL_ARB_internalformat_query", extension) == 0) {
-        FLEXT_ARB_internalformat_query = GL_TRUE;
+    if (strcmp("GL_ARB_internalformat_query2", extension) == 0) {
+        FLEXT_ARB_internalformat_query2 = GL_TRUE;
     }
 }
 
