@@ -81,6 +81,13 @@ public class ArrayUtils {
 	}
 
 	/**
+	 * Combined check for null or empty array.
+	 */
+	public static <T> boolean isNullOrEmpty(T[] array) {
+		return array == null || array.length == 0;
+	}
+
+	/**
 	 * Returns an {@link Iterable} interface wrapped around an array, in ascending order.
 	 */
 	public static <T> Iterable<T> asIterable(T[] array) {
