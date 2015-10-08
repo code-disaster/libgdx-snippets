@@ -7,7 +7,7 @@ import java.nio.*;
 
 import static com.badlogic.gdx.Gdx.*;
 import static com.badlogic.gdx.graphics.GL30.*;
-import static com.badlogic.gdx.graphics.Texture.*;
+import static com.badlogic.gdx.graphics.GL33Ext.*;
 
 /**
  * An extension to {@link FrameBuffer} with multiple color attachments. Can be used as
@@ -78,26 +78,26 @@ public class MultiTargetFrameBuffer extends GLFrameBuffer<Texture> {
 
 			depthStencilBufferHandle = gl30.glGenRenderbuffer();
 
-			gl30.glBindRenderbuffer(GL30.GL_RENDERBUFFER, depthStencilBufferHandle);
-			gl30.glRenderbufferStorage(GL30.GL_RENDERBUFFER, GL30.GL_DEPTH24_STENCIL8, width, height);
+			gl30.glBindRenderbuffer(GL_RENDERBUFFER, depthStencilBufferHandle);
+			gl30.glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width, height);
 
-			gl30.glBindRenderbuffer(GL30.GL_RENDERBUFFER, 0);
+			gl30.glBindRenderbuffer(GL_RENDERBUFFER, 0);
 
-			gl30.glFramebufferRenderbuffer(GL30.GL_FRAMEBUFFER, GL30.GL_DEPTH_STENCIL_ATTACHMENT,
-					GL30.GL_RENDERBUFFER, depthStencilBufferHandle);
+			gl30.glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT,
+					GL_RENDERBUFFER, depthStencilBufferHandle);
 
 		} else if (hasDepth) {
 
 			depthBufferHandle = gl30.glGenTexture();
 
-			gl30.glBindTexture(GL30.GL_TEXTURE_2D, depthBufferHandle);
-			gl30.glTexImage2D(GL30.GL_TEXTURE_2D, 0, GL30.GL_DEPTH_COMPONENT32F, width, height, 0,
-					GL30.GL_DEPTH_COMPONENT, GL30.GL_FLOAT, null);
+			gl30.glBindTexture(GL_TEXTURE_2D, depthBufferHandle);
+			gl30.glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32F, width, height, 0,
+					GL_DEPTH_COMPONENT, GL_FLOAT, null);
 
-			gl30.glBindTexture(GL30.GL_TEXTURE_2D, 0);
+			gl30.glBindTexture(GL_TEXTURE_2D, 0);
 
-			gl30.glFramebufferTexture2D(GL30.GL_FRAMEBUFFER, GL30.GL_DEPTH_ATTACHMENT,
-					GL30.GL_TEXTURE_2D, depthBufferHandle, 0);
+			gl30.glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
+					GL_TEXTURE_2D, depthBufferHandle, 0);
 		}
 
 		// check status again
@@ -123,8 +123,8 @@ public class MultiTargetFrameBuffer extends GLFrameBuffer<Texture> {
 			result = new Texture(data);
 		}
 
-		result.setFilter(TextureFilter.Nearest, TextureFilter.Nearest);
-		result.setWrap(TextureWrap.ClampToEdge, TextureWrap.ClampToEdge);
+		result.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+		result.setWrap(Texture.TextureWrap.ClampToEdge, Texture.TextureWrap.ClampToEdge);
 
 		return result;
 	}
@@ -150,10 +150,10 @@ public class MultiTargetFrameBuffer extends GLFrameBuffer<Texture> {
 
 	public void clampToBorder(int index, Color color) {
 		int handle = colorTextures[index].getTextureObjectHandle();
-		gl30.glBindTexture(GL30.GL_TEXTURE_2D, handle);
+		gl30.glBindTexture(GL_TEXTURE_2D, handle);
 
-		gl30.glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL33Ext.GL_CLAMP_TO_BORDER);
-		gl30.glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL33Ext.GL_CLAMP_TO_BORDER);
+		gl30.glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+		gl30.glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
 
 		synchronized (tmpColors) {
 			tmpColors.clear();
@@ -163,10 +163,10 @@ public class MultiTargetFrameBuffer extends GLFrameBuffer<Texture> {
 			tmpColors.put(color.a);
 			tmpColors.flip();
 
-			gl30.glTexParameterfv(GL30.GL_TEXTURE_2D, GL33Ext.GL_TEXTURE_BORDER_COLOR, tmpColors);
+			gl30.glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, tmpColors);
 		}
 
-		gl30.glBindTexture(GL30.GL_TEXTURE_2D, 0);
+		gl30.glBindTexture(GL_TEXTURE_2D, 0);
 	}
 
 	public void clearColorBuffer(Color color, int... indices) {
@@ -179,13 +179,13 @@ public class MultiTargetFrameBuffer extends GLFrameBuffer<Texture> {
 			tmpColors.flip();
 
 			for (int index : indices) {
-				gl30.glClearBufferfv(GL30.GL_COLOR, index, tmpColors);
+				gl30.glClearBufferfv(GL_COLOR, index, tmpColors);
 			}
 		}
 	}
 
 	public void clearDepthBuffer(float depth) {
-		gl30.glClearBufferfi(GL30.GL_DEPTH, 0, depth, 0);
+		gl30.glClearBufferfi(GL_DEPTH, 0, depth, 0);
 	}
 
 	public void clearStencilBuffer(int value) {
