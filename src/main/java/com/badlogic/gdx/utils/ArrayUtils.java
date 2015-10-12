@@ -1,7 +1,7 @@
 package com.badlogic.gdx.utils;
 
 import java.util.*;
-import java.util.function.Consumer;
+import java.util.function.*;
 
 /**
  * Array utility functions.
@@ -17,6 +17,56 @@ public class ArrayUtils {
 	public static <T> void forEach(T[] array, Consumer<T> action) {
 		for (T t : array) {
 			action.accept(t);
+		}
+	}
+
+	/**
+	 * Convenience function to iterate an array. Stops if user-supplied function returns False.
+	 */
+	public static <T> void forEachWhile(T[] array, Function<T, Boolean> action) {
+		for (T t : array) {
+			if (!action.apply(t)) {
+				break;
+			}
+		}
+	}
+
+	/**
+	 * Iterates the array, and returns the first item which fulfills the user-defined comparison.
+	 * <p>
+	 * Returns null if no match is found.
+	 */
+	public static <T> T find(T[] array, Function<T, Boolean> match) {
+		for (T t : array) {
+			if (match.apply(t)) {
+				return t;
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Iterates the array, and returns the index of the first item which fulfills the user-defined comparison.
+	 * <p>
+	 * Returns -1 if no match is found.
+	 */
+	public static <T> int findIndex(T[] array, Function<T, Boolean> match) {
+		for (int i = 0; i < array.length; i++) {
+			if (match.apply(array[i])) {
+				return i;
+			}
+		}
+		return -1;
+	}
+
+	/**
+	 * Iterates the array, consuming items only which fulfill the user-defined comparison.
+	 */
+	public static <T> void findAll(T[] array, Function<T, Boolean> match, Consumer<T> action) {
+		for (T t : array) {
+			if (match.apply(t)) {
+				action.accept(t);
+			}
 		}
 	}
 
