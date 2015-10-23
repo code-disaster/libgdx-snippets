@@ -1,7 +1,9 @@
 package com.badlogic.gdx.utils;
 
+import javax.annotation.Nonnull;
 import java.util.*;
-import java.util.function.*;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 /**
  * Array utility functions.
@@ -122,9 +124,10 @@ public class ArrayUtils {
 		T[][] dest = (T[][]) copy;
 
 		for (int i = lowerDim0; i < columns - upperDim0; i++) {
-			for (int j = lowerDim1; j < rows - upperDim1; j++) {
+			/*for (int j = lowerDim1; j < rows - upperDim1; j++) {
 				dest[i][j] = arrayOfArray[i - lowerDim0][j - lowerDim1];
-			}
+			}*/
+			System.arraycopy(arrayOfArray[i - lowerDim0], 0, dest[i], lowerDim1, rows - upperDim1 - lowerDim1);
 		}
 
 		return dest;
@@ -210,7 +213,10 @@ public class ArrayUtils {
 
 		@Override
 		public T next() {
-			return array[index++];
+			if (index < array.length) {
+				return array[index++];
+			}
+			throw new NoSuchElementException("Out of bounds!");
 		}
 	}
 
@@ -233,7 +239,10 @@ public class ArrayUtils {
 
 		@Override
 		public T next() {
-			return array[index--];
+			if (index >= 0) {
+				return array[index--];
+			}
+			throw new NoSuchElementException("Out of bounds!");
 		}
 	}
 
@@ -273,7 +282,7 @@ public class ArrayUtils {
 		}
 
 		@Override
-		public Iterator<T> iterator() {
+		public @Nonnull Iterator<T> iterator() {
 			return new ArrayIterator<>(array);
 		}
 

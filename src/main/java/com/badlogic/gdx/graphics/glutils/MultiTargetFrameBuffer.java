@@ -131,8 +131,8 @@ public class MultiTargetFrameBuffer extends GLFrameBuffer<Texture> {
 
 	@Override
 	protected void disposeColorTexture(Texture colorTexture) {
-		for (int i = 0; i < colorTextures.length; i++) {
-			colorTextures[i].dispose();
+		for (Texture texture : colorTextures) {
+			texture.dispose();
 		}
 
 		if (depthBufferHandle != 0) {
@@ -194,8 +194,8 @@ public class MultiTargetFrameBuffer extends GLFrameBuffer<Texture> {
 
 	private class ColorBufferTextureData implements TextureData {
 
-		private int width;
-		private int height;
+		private final int width;
+		private final int height;
 
 		ColorBufferTextureData(int width, int height) {
 			this.width = width;

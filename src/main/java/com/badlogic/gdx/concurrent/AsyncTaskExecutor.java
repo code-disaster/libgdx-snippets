@@ -2,6 +2,7 @@ package com.badlogic.gdx.concurrent;
 
 import com.badlogic.gdx.utils.Disposable;
 
+import javax.annotation.Nonnull;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -10,7 +11,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class AsyncTaskExecutor implements Disposable {
 
-	private ExecutorService service;
+	private final ExecutorService service;
 
 	public AsyncTaskExecutor(int threadCount) {
 
@@ -54,7 +55,7 @@ public class AsyncTaskExecutor implements Disposable {
 		}
 
 		@Override
-		public Thread newThread(Runnable runnable) {
+		public Thread newThread(@Nonnull Runnable runnable) {
 			Thread thread = new Thread(group, runnable, namePrefix + threadNumber.getAndIncrement());
 			thread.setDaemon(true);
 			return thread;
