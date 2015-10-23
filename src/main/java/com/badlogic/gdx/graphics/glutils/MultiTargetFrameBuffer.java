@@ -192,7 +192,7 @@ public class MultiTargetFrameBuffer extends GLFrameBuffer<Texture> {
 		gl30.glClearStencil(value);
 	}
 
-	private class ColorBufferTextureData implements TextureData {
+	private static class ColorBufferTextureData implements TextureData {
 
 		private final int width;
 		private final int height;

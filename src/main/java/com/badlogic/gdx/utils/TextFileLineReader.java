@@ -25,8 +25,6 @@ public class TextFileLineReader {
 	 */
 	public static void readLines(FileHandle file, String[] patterns, IOConsumer<String> consumer) throws IOException {
 
-		BufferedReader reader = new BufferedReader(file.reader());
-
 		Pattern[] p = null;
 		int lineNo = 0;
 
@@ -37,7 +35,7 @@ public class TextFileLineReader {
 			}
 		}
 
-		try {
+		try (BufferedReader reader = new BufferedReader(file.reader())) {
 
 			String line;
 			while ((line = reader.readLine()) != null) {
@@ -59,8 +57,6 @@ public class TextFileLineReader {
 		} catch (IOException e) {
 			throw new IOException("Error reading " + file.path() + " at line #" + lineNo, e);
 		}
-
-		reader.close();
 
 	}
 
