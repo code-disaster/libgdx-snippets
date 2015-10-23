@@ -1,3 +1,7 @@
+#fips
+fips/
+fips-jni/
+
 # fips output
 fips-build/
 fips-deploy/
