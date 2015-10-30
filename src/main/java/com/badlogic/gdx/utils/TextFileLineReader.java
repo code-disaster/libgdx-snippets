@@ -1,7 +1,7 @@
 package com.badlogic.gdx.utils;
 
 import com.badlogic.gdx.files.FileHandle;
-import com.badlogic.gdx.function.IOConsumer;
+import com.badlogic.gdx.function.ThrowableConsumer;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -15,7 +15,9 @@ public class TextFileLineReader {
 	/**
 	 * Reads the file as text, passing its content to the consumer function, line by line.
 	 */
-	public static void readLines(FileHandle file, IOConsumer<String> consumer) throws IOException {
+	public static void readLines(FileHandle file,
+								 ThrowableConsumer<String, IOException> consumer) throws IOException {
+
 		readLines(file, null, consumer);
 	}
 
@@ -23,7 +25,8 @@ public class TextFileLineReader {
 	 * Reads the file as text, filtering each line by a user-defined set of RegEx patterns.
 	 * The line is passed to the consumer function only if (at least) one of the patterns matches.
 	 */
-	public static void readLines(FileHandle file, String[] patterns, IOConsumer<String> consumer) throws IOException {
+	public static void readLines(FileHandle file, String[] patterns,
+								 ThrowableConsumer<String, IOException> consumer) throws IOException {
 
 		Pattern[] p = null;
 		int lineNo = 0;
