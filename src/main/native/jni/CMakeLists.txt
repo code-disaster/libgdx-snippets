@@ -14,7 +14,12 @@ fips_begin_sharedlib(gdx-snippets-native)
 
     fips_setup_jni()
 
-    fips_include_directories(flextgl generated)
+    fips_include_directories(
+        flextgl
+        generated
+        glsl-optimizer
+        ../../../../deps/glsl-optimizer/src/glsl
+    )
 
     fips_dir(flextgl)
     fips_files(
@@ -24,11 +29,18 @@ fips_begin_sharedlib(gdx-snippets-native)
     fips_dir(generated)
     fips_generate(FROM gdx-snippets-jni.yml TYPE JNICodeGenerator SOURCE gdx-snippets-jni.cpp)
 
+    fips_dir(glsl-optimizer)
+    fips_files(
+        glslopt.h glslopt.cpp
+    )
+
     if (FIPS_WINDOWS)
         fips_libs(OpenGL32)
     endif()
 
     if (FIPS_OSX)
+        link_directories(glsl-optimizer/lib/osx)
+        fips_libs(glsl_optimizer)
         fips_frameworks_osx(OpenGL)
     endif()
 

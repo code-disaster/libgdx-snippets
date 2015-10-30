@@ -1,2 +1,6 @@
 source-path   : "../../../java"
 class-path    : "../../../../../target/classes"
+
+includes :
+    - "**/gdx/graphics/*.java"
+    - "**/gdx/utils/*.java"
