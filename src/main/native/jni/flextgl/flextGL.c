@@ -52,9 +52,9 @@ int flextInit(void)
 
     /* --- Check for minimal version and profile --- */
 
-    if (major * 10 + minor < 33) {
-#if !defined(FLEXT_NO_LOGGING)
-        fprintf(stderr, "Error: OpenGL version 3.3 not supported.\n");
+    if (major * 10 + minor < 32) {
+#if !defined(FLEXT_NO_LOGGING)	
+        fprintf(stderr, "Error: OpenGL version 3.2 not supported.\n");
         fprintf(stderr, "       Your version is %d.%d.\n", major, minor);
         fprintf(stderr, "       Try updating your graphics driver.\n");
 #endif
@@ -65,7 +65,7 @@ int flextInit(void)
     /* --- Check for extensions --- */
 
     glGetIntegerv(GL_NUM_EXTENSIONS, &num_extensions);
-
+    
     for (i = 0; i < num_extensions; i++) {
         add_extension((const char*)glGetStringi(GL_EXTENSIONS, i));
     }
@@ -87,6 +87,11 @@ void flextLoadOpenGLFunctions(void)
     glpfDebugMessageControlARB = (PFNGLDEBUGMESSAGECONTROLARB_PROC*)get_proc("glDebugMessageControlARB");
     glpfDebugMessageInsertARB = (PFNGLDEBUGMESSAGEINSERTARB_PROC*)get_proc("glDebugMessageInsertARB");
     glpfGetDebugMessageLogARB = (PFNGLGETDEBUGMESSAGELOGARB_PROC*)get_proc("glGetDebugMessageLogARB");
+
+
+    /* GL_ARB_internalformat_query2 */
+
+    glpfGetInternalformati64v = (PFNGLGETINTERNALFORMATI64V_PROC*)get_proc("glGetInternalformati64v");
 
 
     /* GL_VERSION_1_2 */
@@ -380,42 +385,11 @@ void flextLoadOpenGLFunctions(void)
     glpfWaitSync = (PFNGLWAITSYNC_PROC*)get_proc("glWaitSync");
 
 
-    /* GL_VERSION_3_3 */
-
-    glpfBindFragDataLocationIndexed = (PFNGLBINDFRAGDATALOCATIONINDEXED_PROC*)get_proc("glBindFragDataLocationIndexed");
-    glpfBindSampler = (PFNGLBINDSAMPLER_PROC*)get_proc("glBindSampler");
-    glpfDeleteSamplers = (PFNGLDELETESAMPLERS_PROC*)get_proc("glDeleteSamplers");
-    glpfGenSamplers = (PFNGLGENSAMPLERS_PROC*)get_proc("glGenSamplers");
-    glpfGetFragDataIndex = (PFNGLGETFRAGDATAINDEX_PROC*)get_proc("glGetFragDataIndex");
-    glpfGetQueryObjecti64v = (PFNGLGETQUERYOBJECTI64V_PROC*)get_proc("glGetQueryObjecti64v");
-    glpfGetQueryObjectui64v = (PFNGLGETQUERYOBJECTUI64V_PROC*)get_proc("glGetQueryObjectui64v");
-    glpfGetSamplerParameterIiv = (PFNGLGETSAMPLERPARAMETERIIV_PROC*)get_proc("glGetSamplerParameterIiv");
-    glpfGetSamplerParameterIuiv = (PFNGLGETSAMPLERPARAMETERIUIV_PROC*)get_proc("glGetSamplerParameterIuiv");
-    glpfGetSamplerParameterfv = (PFNGLGETSAMPLERPARAMETERFV_PROC*)get_proc("glGetSamplerParameterfv");
-    glpfGetSamplerParameteriv = (PFNGLGETSAMPLERPARAMETERIV_PROC*)get_proc("glGetSamplerParameteriv");
-    glpfIsSampler = (PFNGLISSAMPLER_PROC*)get_proc("glIsSampler");
-    glpfQueryCounter = (PFNGLQUERYCOUNTER_PROC*)get_proc("glQueryCounter");
-    glpfSamplerParameterIiv = (PFNGLSAMPLERPARAMETERIIV_PROC*)get_proc("glSamplerParameterIiv");
-    glpfSamplerParameterIuiv = (PFNGLSAMPLERPARAMETERIUIV_PROC*)get_proc("glSamplerParameterIuiv");
-    glpfSamplerParameterf = (PFNGLSAMPLERPARAMETERF_PROC*)get_proc("glSamplerParameterf");
-    glpfSamplerParameterfv = (PFNGLSAMPLERPARAMETERFV_PROC*)get_proc("glSamplerParameterfv");
-    glpfSamplerParameteri = (PFNGLSAMPLERPARAMETERI_PROC*)get_proc("glSamplerParameteri");
-    glpfSamplerParameteriv = (PFNGLSAMPLERPARAMETERIV_PROC*)get_proc("glSamplerParameteriv");
-    glpfVertexAttribDivisor = (PFNGLVERTEXATTRIBDIVISOR_PROC*)get_proc("glVertexAttribDivisor");
-    glpfVertexAttribP1ui = (PFNGLVERTEXATTRIBP1UI_PROC*)get_proc("glVertexAttribP1ui");
-    glpfVertexAttribP1uiv = (PFNGLVERTEXATTRIBP1UIV_PROC*)get_proc("glVertexAttribP1uiv");
-    glpfVertexAttribP2ui = (PFNGLVERTEXATTRIBP2UI_PROC*)get_proc("glVertexAttribP2ui");
-    glpfVertexAttribP2uiv = (PFNGLVERTEXATTRIBP2UIV_PROC*)get_proc("glVertexAttribP2uiv");
-    glpfVertexAttribP3ui = (PFNGLVERTEXATTRIBP3UI_PROC*)get_proc("glVertexAttribP3ui");
-    glpfVertexAttribP3uiv = (PFNGLVERTEXATTRIBP3UIV_PROC*)get_proc("glVertexAttribP3uiv");
-    glpfVertexAttribP4ui = (PFNGLVERTEXATTRIBP4UI_PROC*)get_proc("glVertexAttribP4ui");
-    glpfVertexAttribP4uiv = (PFNGLVERTEXATTRIBP4UIV_PROC*)get_proc("glVertexAttribP4uiv");
-
-
 }
 
 /* ----------------------- Extension flag definitions ---------------------- */
 int FLEXT_ARB_debug_output = GL_FALSE;
+int FLEXT_ARB_internalformat_query2 = GL_FALSE;
 
 /* ---------------------- Function pointer definitions --------------------- */
 
@@ -425,6 +399,10 @@ PFNGLDEBUGMESSAGECALLBACKARB_PROC* glpfDebugMessageCallbackARB = NULL;
 PFNGLDEBUGMESSAGECONTROLARB_PROC* glpfDebugMessageControlARB = NULL;
 PFNGLDEBUGMESSAGEINSERTARB_PROC* glpfDebugMessageInsertARB = NULL;
 PFNGLGETDEBUGMESSAGELOGARB_PROC* glpfGetDebugMessageLogARB = NULL;
+
+/* GL_ARB_internalformat_query2 */
+
+PFNGLGETINTERNALFORMATI64V_PROC* glpfGetInternalformati64v = NULL;
 
 /* GL_VERSION_1_2 */
 
@@ -708,43 +686,15 @@ PFNGLTEXIMAGE2DMULTISAMPLE_PROC* glpfTexImage2DMultisample = NULL;
 PFNGLTEXIMAGE3DMULTISAMPLE_PROC* glpfTexImage3DMultisample = NULL;
 PFNGLWAITSYNC_PROC* glpfWaitSync = NULL;
 
-/* GL_VERSION_3_3 */
-
-PFNGLBINDFRAGDATALOCATIONINDEXED_PROC* glpfBindFragDataLocationIndexed = NULL;
-PFNGLBINDSAMPLER_PROC* glpfBindSampler = NULL;
-PFNGLDELETESAMPLERS_PROC* glpfDeleteSamplers = NULL;
-PFNGLGENSAMPLERS_PROC* glpfGenSamplers = NULL;
-PFNGLGETFRAGDATAINDEX_PROC* glpfGetFragDataIndex = NULL;
-PFNGLGETQUERYOBJECTI64V_PROC* glpfGetQueryObjecti64v = NULL;
-PFNGLGETQUERYOBJECTUI64V_PROC* glpfGetQueryObjectui64v = NULL;
-PFNGLGETSAMPLERPARAMETERIIV_PROC* glpfGetSamplerParameterIiv = NULL;
-PFNGLGETSAMPLERPARAMETERIUIV_PROC* glpfGetSamplerParameterIuiv = NULL;
-PFNGLGETSAMPLERPARAMETERFV_PROC* glpfGetSamplerParameterfv = NULL;
-PFNGLGETSAMPLERPARAMETERIV_PROC* glpfGetSamplerParameteriv = NULL;
-PFNGLISSAMPLER_PROC* glpfIsSampler = NULL;
-PFNGLQUERYCOUNTER_PROC* glpfQueryCounter = NULL;
-PFNGLSAMPLERPARAMETERIIV_PROC* glpfSamplerParameterIiv = NULL;
-PFNGLSAMPLERPARAMETERIUIV_PROC* glpfSamplerParameterIuiv = NULL;
-PFNGLSAMPLERPARAMETERF_PROC* glpfSamplerParameterf = NULL;
-PFNGLSAMPLERPARAMETERFV_PROC* glpfSamplerParameterfv = NULL;
-PFNGLSAMPLERPARAMETERI_PROC* glpfSamplerParameteri = NULL;
-PFNGLSAMPLERPARAMETERIV_PROC* glpfSamplerParameteriv = NULL;
-PFNGLVERTEXATTRIBDIVISOR_PROC* glpfVertexAttribDivisor = NULL;
-PFNGLVERTEXATTRIBP1UI_PROC* glpfVertexAttribP1ui = NULL;
-PFNGLVERTEXATTRIBP1UIV_PROC* glpfVertexAttribP1uiv = NULL;
-PFNGLVERTEXATTRIBP2UI_PROC* glpfVertexAttribP2ui = NULL;
-PFNGLVERTEXATTRIBP2UIV_PROC* glpfVertexAttribP2uiv = NULL;
-PFNGLVERTEXATTRIBP3UI_PROC* glpfVertexAttribP3ui = NULL;
-PFNGLVERTEXATTRIBP3UIV_PROC* glpfVertexAttribP3uiv = NULL;
-PFNGLVERTEXATTRIBP4UI_PROC* glpfVertexAttribP4ui = NULL;
-PFNGLVERTEXATTRIBP4UIV_PROC* glpfVertexAttribP4uiv = NULL;
-
 
 
 static void add_extension(const char* extension)
 {
     if (strcmp("GL_ARB_debug_output", extension) == 0) {
         FLEXT_ARB_debug_output = GL_TRUE;
+    }
+    if (strcmp("GL_ARB_internalformat_query2", extension) == 0) {
+        FLEXT_ARB_internalformat_query2 = GL_TRUE;
     }
 }
 
