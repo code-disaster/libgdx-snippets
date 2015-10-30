@@ -1,5 +1,10 @@
 source-path   : "../../../java"
-class-path    : "../../../../../target/classes"
+
+# Maven build path
+#class-path    : "../../../../../target/classes"
+
+# Gradle build path
+class-path    : "../../../../../build/classes/main"
 
 includes :
     - "**/gdx/graphics/*.java"
