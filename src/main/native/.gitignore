@@ -1,5 +1,6 @@
 #fips
 fips/
+fips-glsl-optimizer/
 fips-jni/
 
 # fips output

@@ -1,6 +1,3 @@
 [submodule "deps/flextGL"]
 	path = deps/flextGL
 	url = https://github.com/code-disaster/flextGL.git
-[submodule "deps/glsl-optimizer"]
-	path = deps/glsl-optimizer
-	url = https://github.com/aras-p/glsl-optimizer.git
