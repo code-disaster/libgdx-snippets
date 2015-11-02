@@ -10,8 +10,8 @@ namespace glslopt
         return glslopt_initialize((glslopt_target) target);
     }
 
-    glslopt_shader* optimizeShader(glslopt_ctx* ctx, uint32_t type,
-        const char* source, int32_t options)
+    glslopt_shader* optimizeShader(glslopt_ctx* ctx, int32_t type,
+        const char* source, uint32_t options)
     {
         return glslopt_optimize(ctx, (glslopt_shader_type) type, source, options);
     }

@@ -1,5 +1,7 @@
 #pragma once
 
+#include <stdint.h>
+
 struct glslopt_ctx;
 struct glslopt_shader;
 
