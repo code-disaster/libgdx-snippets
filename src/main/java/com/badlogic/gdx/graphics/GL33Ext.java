@@ -36,6 +36,10 @@ public final class GL33Ext {
 		#include "flextGL.h"
 	*/
 
+	public static native void glBindFragDataLocation(int program, int colorNumber, String name); /*
+		glBindFragDataLocation(program, colorNumber, name);
+	*/
+
 	private static native void nglGetInternalFormati64v(int target, int internalformat,
 														int pname, int bufSize, LongBuffer params); /*
 		if (FLEXT_ARB_internalformat_query2) {
