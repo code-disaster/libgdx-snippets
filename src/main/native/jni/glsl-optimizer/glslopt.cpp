@@ -5,14 +5,15 @@
 namespace glslopt
 {
 
-    glslopt_ctx* initializeContext()
+    glslopt_ctx* initializeContext(int32_t target)
     {
-        return glslopt_initialize(kGlslTargetOpenGL);
+        return glslopt_initialize((glslopt_target) target);
     }
 
-    glslopt_shader* optimizeShader(glslopt_ctx* ctx, int type, const char* source)
+    glslopt_shader* optimizeShader(glslopt_ctx* ctx, uint32_t type,
+        const char* source, int32_t options)
     {
-        return glslopt_optimize(ctx, (glslopt_shader_type) type, source, kGlslOptionSkipPreprocessor);
+        return glslopt_optimize(ctx, (glslopt_shader_type) type, source, options);
     }
 
     bool getShaderStatus(glslopt_shader* shader)

@@ -4,18 +4,35 @@ import java.io.IOException;
 
 public class GLSLOptimizer {
 
+	public enum Target {
+		OpenGL,
+		OpenGLES20,
+		OpenGLES30,
+		Metal
+	}
+
 	public enum ShaderType {
 		Vertex,
 		Fragment
 	}
 
-	public static String optimize(ShaderType type, String source) throws IOException {
+	public static final int OptionSkipPreprocessor = 1;
+	public static final int OptionNotFullShader = 2;
 
-		long ctx = initializeContext();
+	/**
+	 * Utility wrapper function to optimize GLSL shader code.
+	 *
+	 * Runs glsl-optimizer on the provided shader code, and returns the optimized version.
+	 *
+	 * Throws an IOException with the shader log as error message.
+	 */
+	public static String optimize(Target target, ShaderType type, String source, int options) throws IOException {
+
+		long ctx = initializeContext(target.ordinal());
 
 		try {
 
-			long shader = optimizeShader(ctx, type.ordinal(), source);
+			long shader = optimizeShader(ctx, type.ordinal(), source, options);
 
 			try {
 
@@ -40,12 +57,12 @@ public class GLSLOptimizer {
 		#include "glslopt.h"
 	*/
 
-	private static native long initializeContext(); /*
-		return (int64_t) glslopt::initializeContext();
+	private static native long initializeContext(int target); /*
+		return (int64_t) glslopt::initializeContext(target);
 	*/
 
-	private static native long optimizeShader(long ctx, int type, String source); /*
-		return (int64_t) glslopt::optimizeShader((glslopt_ctx*) ctx, type, source);
+	private static native long optimizeShader(long ctx, int type, String source, int options); /*
+		return (int64_t) glslopt::optimizeShader((glslopt_ctx*) ctx, type, source, (uint32_t) options);
 	*/
 
 	private static native boolean getShaderStatus(long shader); /*
