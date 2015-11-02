@@ -7,6 +7,10 @@ import com.badlogic.gdx.utils.JsonWriter;
 import java.io.IOException;
 import java.util.function.Consumer;
 
+/**
+ * Utility functions to serialize a hierarchy of objects annotated with
+ * {@link com.badlogic.gdx.json.annotations.JsonSerializable} and {@link com.badlogic.gdx.json.annotations.JsonSerialize}.
+ */
 public class AnnotatedJson {
 
 	public static <T> T read(FileHandle path, Class<T> clazz, Consumer<Json> setupJson) throws IOException {
