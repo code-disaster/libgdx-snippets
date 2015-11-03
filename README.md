@@ -2,15 +2,25 @@
 
 A collection of code snippets for the lazy [libGDX](https://github.com/libgdx/libgdx) user.
 
+## Outline
+
 - Aimed for desktop projects, so the code won't run on HTML5 and mobile.
-- Written/compiled with JDK 8, and uses Java 1.8 language features.
+- Written/compiled with JDK 8, and uses Java 1.8 language features. Be advised you may encounter heavy (ab)use of lambdas.
 - Invades the ```com.badlogic.gdx.*``` namespace.
 - Embeds a small native library for some utility functions.
-- No external dependencies (besides libGDX, of course).
+- (Almost) no external dependencies besides libGDX.
+
+## Highlights
+
+- [AnnotatedJson](https://github.com/code-disaster/libgdx-snippets/blob/master/src/main/java/com/badlogic/gdx/json/AnnotatedJson.java): custom JSON serializer, based on libGDX' Json classes, which allows annotation-driven serialization of object hierarchies.
+- [AutoDisposer](https://github.com/code-disaster/libgdx-snippets/blob/master/src/main/java/com/badlogic/gdx/utils/AutoDisposer.java): annotation-driven, semi-automatic disposal of disposable object hierarchies.
+- [GL33Ext](https://github.com/code-disaster/libgdx-snippets/blob/master/src/main/java/com/badlogic/gdx/graphics/GL33Ext.java): native interface to [flextGL](https://github.com/code-disaster/flextGL.git) to expose desktop OpenGL functions not made available by libGDX/LWJGL.
+- [GLSLOptimizer](https://github.com/code-disaster/libgdx-snippets/blob/master/src/main/java/com/badlogic/gdx/graphics/GLSLOptimizer.java): Native interface to [glsl-optimizer](https://github.com/aras-p/glsl-optimizer.git).
+- [MultiTargetFrameBuffer](https://github.com/code-disaster/libgdx-snippets/blob/master/src/main/java/com/badlogic/gdx/graphics/glutils/MultiTargetFrameBuffer.java): custom GLFrameBuffer implementation for creating multi-render targets, e.g. usable for deferred rendering (G-buffers).
 
 ## Usage
 
-You just need to add a call to ```GdxSnippetsNativesLoader.load()```, for example in your create() function.
+To use the native interfaces, you just need to add a call to ```GdxSnippetsNativesLoader.load()```, for example in your create() function.
 
 ```java
 public class MyGdxGameAdapter extends ApplicationAdapter {
