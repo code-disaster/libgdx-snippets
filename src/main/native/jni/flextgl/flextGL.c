@@ -89,6 +89,14 @@ void flextLoadOpenGLFunctions(void)
     glpfGetDebugMessageLogARB = (PFNGLGETDEBUGMESSAGELOGARB_PROC*)get_proc("glGetDebugMessageLogARB");
 
 
+    /* GL_ARB_draw_buffers_blend */
+
+    glpfBlendEquationSeparateiARB = (PFNGLBLENDEQUATIONSEPARATEIARB_PROC*)get_proc("glBlendEquationSeparateiARB");
+    glpfBlendEquationiARB = (PFNGLBLENDEQUATIONIARB_PROC*)get_proc("glBlendEquationiARB");
+    glpfBlendFuncSeparateiARB = (PFNGLBLENDFUNCSEPARATEIARB_PROC*)get_proc("glBlendFuncSeparateiARB");
+    glpfBlendFunciARB = (PFNGLBLENDFUNCIARB_PROC*)get_proc("glBlendFunciARB");
+
+
     /* GL_ARB_internalformat_query2 */
 
     glpfGetInternalformati64v = (PFNGLGETINTERNALFORMATI64V_PROC*)get_proc("glGetInternalformati64v");
@@ -389,6 +397,7 @@ void flextLoadOpenGLFunctions(void)
 
 /* ----------------------- Extension flag definitions ---------------------- */
 int FLEXT_ARB_debug_output = GL_FALSE;
+int FLEXT_ARB_draw_buffers_blend = GL_FALSE;
 int FLEXT_ARB_internalformat_query2 = GL_FALSE;
 
 /* ---------------------- Function pointer definitions --------------------- */
@@ -399,6 +408,13 @@ PFNGLDEBUGMESSAGECALLBACKARB_PROC* glpfDebugMessageCallbackARB = NULL;
 PFNGLDEBUGMESSAGECONTROLARB_PROC* glpfDebugMessageControlARB = NULL;
 PFNGLDEBUGMESSAGEINSERTARB_PROC* glpfDebugMessageInsertARB = NULL;
 PFNGLGETDEBUGMESSAGELOGARB_PROC* glpfGetDebugMessageLogARB = NULL;
+
+/* GL_ARB_draw_buffers_blend */
+
+PFNGLBLENDEQUATIONSEPARATEIARB_PROC* glpfBlendEquationSeparateiARB = NULL;
+PFNGLBLENDEQUATIONIARB_PROC* glpfBlendEquationiARB = NULL;
+PFNGLBLENDFUNCSEPARATEIARB_PROC* glpfBlendFuncSeparateiARB = NULL;
+PFNGLBLENDFUNCIARB_PROC* glpfBlendFunciARB = NULL;
 
 /* GL_ARB_internalformat_query2 */
 
@@ -692,6 +708,9 @@ static void add_extension(const char* extension)
 {
     if (strcmp("GL_ARB_debug_output", extension) == 0) {
         FLEXT_ARB_debug_output = GL_TRUE;
+    }
+    if (strcmp("GL_ARB_draw_buffers_blend", extension) == 0) {
+        FLEXT_ARB_draw_buffers_blend = GL_TRUE;
     }
     if (strcmp("GL_ARB_internalformat_query2", extension) == 0) {
         FLEXT_ARB_internalformat_query2 = GL_TRUE;

@@ -1088,6 +1088,24 @@ GLAPI PFNGLGETDEBUGMESSAGELOGARB_PROC *glpfGetDebugMessageLogARB;
 #define glGetDebugMessageLogARB glpfGetDebugMessageLogARB
 
 
+/* GL_ARB_draw_buffers_blend */
+
+typedef void (APIENTRY PFNGLBLENDEQUATIONSEPARATEIARB_PROC (GLuint buf, GLenum modeRGB, GLenum modeAlpha));
+typedef void (APIENTRY PFNGLBLENDEQUATIONIARB_PROC (GLuint buf, GLenum mode));
+typedef void (APIENTRY PFNGLBLENDFUNCSEPARATEIARB_PROC (GLuint buf, GLenum srcRGB, GLenum dstRGB, GLenum srcAlpha, GLenum dstAlpha));
+typedef void (APIENTRY PFNGLBLENDFUNCIARB_PROC (GLuint buf, GLenum src, GLenum dst));
+
+GLAPI PFNGLBLENDEQUATIONSEPARATEIARB_PROC *glpfBlendEquationSeparateiARB;
+GLAPI PFNGLBLENDEQUATIONIARB_PROC *glpfBlendEquationiARB;
+GLAPI PFNGLBLENDFUNCSEPARATEIARB_PROC *glpfBlendFuncSeparateiARB;
+GLAPI PFNGLBLENDFUNCIARB_PROC *glpfBlendFunciARB;
+
+#define glBlendEquationSeparateiARB glpfBlendEquationSeparateiARB
+#define glBlendEquationiARB glpfBlendEquationiARB
+#define glBlendFuncSeparateiARB glpfBlendFuncSeparateiARB
+#define glBlendFunciARB glpfBlendFunciARB
+
+
 /* GL_ARB_internalformat_query2 */
 
 typedef void (APIENTRY PFNGLGETINTERNALFORMATI64V_PROC (GLenum target, GLenum internalformat, GLenum pname, GLsizei bufSize, GLint64 * params));
@@ -1988,6 +2006,7 @@ GLAPI PFNGLWAITSYNC_PROC *glpfWaitSync;
 /* --------------------------- CATEGORY DEFINES ------------------------------ */
 
 #define GL_ARB_debug_output
+#define GL_ARB_draw_buffers_blend
 #define GL_ARB_internalformat_query2
 #define GL_VERSION_1_0
 #define GL_VERSION_1_1
@@ -2004,6 +2023,7 @@ GLAPI PFNGLWAITSYNC_PROC *glpfWaitSync;
 /* ---------------------- Flags for optional extensions ---------------------- */
 
 extern int FLEXT_ARB_debug_output;
+extern int FLEXT_ARB_draw_buffers_blend;
 extern int FLEXT_ARB_internalformat_query2;
 
 int flextInit(void);
