@@ -50,7 +50,6 @@ public class AnnotatedJsonSerializer<T> implements Json.Serializer<T> {
 	}
 
 	private Class<T> clazz;
-	private JsonSerializable clazzAnnotation;
 	private Array<FieldAdapter> fieldAdapters = new Array<>();
 
 	public AnnotatedJsonSerializer(Json json, Class<T> clazz) {
@@ -69,9 +68,9 @@ public class AnnotatedJsonSerializer<T> implements Json.Serializer<T> {
 
 			if (isKnownContainerType(adapter)) {
 
-				if (fieldType.equals(Array.class)) {
+				if (isArray(adapter)) {
 					writeArray(json, object, adapter);
-				} else if (Map.class.isAssignableFrom(fieldType)) {
+				} else if (isMap(adapter)) {
 					writeMap(json, object, adapter);
 				}
 
@@ -97,9 +96,19 @@ public class AnnotatedJsonSerializer<T> implements Json.Serializer<T> {
 	}
 
 	private void writeMap(Json json, T object, FieldAdapter adapter) {
-		Map<?, ?> map = adapter.get(object);
+
+		JsonMap map = adapter.annotation.map()[0];
+
+		Class<?> clazz = map.map();
 		JsonMapSerializer<?, ?> serializer = (JsonMapSerializer<?, ?>) adapter.serializer;
-		serializer.write(json, map, Array.class);
+
+		if (Map.class.isAssignableFrom(clazz)) {
+			Map<?, ?> value = adapter.get(object);
+			serializer.write(json, value.entrySet(), Map.Entry::getKey, Map.Entry::getValue);
+		} else if (ObjectMap.class.isAssignableFrom(clazz)) {
+			ObjectMap<?, ?> value = adapter.get(object);
+			serializer.write(json, value.entries(), e -> e.key, e -> e.value);
+		}
 	}
 
 	@Override
@@ -115,9 +124,9 @@ public class AnnotatedJsonSerializer<T> implements Json.Serializer<T> {
 
 				if (isKnownContainerType(adapter)) {
 
-					if (fieldType.equals(Array.class)) {
+					if (isArray(adapter)) {
 						readArray(json, jsonData, object, adapter);
-					} else if (Map.class.isAssignableFrom(fieldType)) {
+					} else if (isMap(adapter)) {
 						readMap(json, jsonData, object, adapter);
 					}
 
@@ -157,15 +166,18 @@ public class AnnotatedJsonSerializer<T> implements Json.Serializer<T> {
 
 	private void readMap(Json json, JsonValue jsonData, T object, FieldAdapter adapter) {
 
+		JsonMap map = adapter.annotation.map()[0];
+
+		Class<?> clazz = map.map();
 		JsonMapSerializer<?, ?> serializer = (JsonMapSerializer<?, ?>) adapter.serializer;
-		Map<?, ?> map = serializer.read(json, jsonData, Map.class);
 
-		if (map == null) {
-			// todo: warning
-			return;
+		if (Map.class.isAssignableFrom(clazz)) {
+			Map<?, ?> value = serializer.read(json, jsonData);
+			adapter.set(object, value);
+		} else if (ObjectMap.class.isAssignableFrom(clazz)) {
+			ObjectMap<?, ?> value = serializer.read(json, jsonData, ObjectMap::new, ObjectMap::put);
+			adapter.set(object, value);
 		}
-
-		adapter.set(object, map);
 	}
 
 	private void createSerializer(Json json) {
@@ -174,9 +186,6 @@ public class AnnotatedJsonSerializer<T> implements Json.Serializer<T> {
 			throw new GdxRuntimeException("Missing @JsonSerializable annotation for '" +
 					ClassReflection.getSimpleName(clazz) + "'.");
 		}
-
-		clazzAnnotation = ClassReflection.getDeclaredAnnotation(
-				clazz, JsonSerializable.class).getAnnotation(JsonSerializable.class);
 
 		Field[] fields = ClassReflection.getFields(clazz);
 		createSerializerFields(json, fields);
@@ -245,33 +254,14 @@ public class AnnotatedJsonSerializer<T> implements Json.Serializer<T> {
 	}
 
 	private boolean isKnownContainerType(FieldAdapter adapter) {
-
-		Class<?> clazz = adapter.field.getType();
-
-		if (clazz.equals(Array.class)) {
-			return true;
-		}
-
-		if (Map.class.isAssignableFrom(clazz)) {
-			return true;
-		}
-
-		return false;
+		return isArray(adapter) || isMap(adapter);
 	}
 
 	private Class<?>[] getContainerComponentTypes(FieldAdapter adapter) {
 
-		Class<?> clazz = adapter.field.getType();
-
-		/*if (clazz.isArray()) {
-			return new Class[] { clazz.getComponentType() };
-		}*/
-
-		if (clazz.equals(Array.class)) {
+		if (isArray(adapter)) {
 			return new Class[] { adapter.annotation.array()[0].value() };
-		}
-
-		if (Map.class.isAssignableFrom(clazz)) {
+		} else if (isMap(adapter)) {
 			JsonMap map = adapter.annotation.map()[0];
 			return new Class[] { map.key(), map.value() };
 		}
@@ -281,9 +271,7 @@ public class AnnotatedJsonSerializer<T> implements Json.Serializer<T> {
 
 	private Json.Serializer<?> addContainerSerializer(FieldAdapter adapter) {
 
-		Class<?> clazz = adapter.field.getType();
-
-		if (clazz.equals(Array.class)) {
+		if (isArray(adapter)) {
 
 			JsonArray[] arrays = adapter.annotation.array();
 
@@ -295,18 +283,10 @@ public class AnnotatedJsonSerializer<T> implements Json.Serializer<T> {
 			JsonArray array = arrays[0];
 
 			return new JsonArraySerializer<>(adapter.getName(), array);
-		}
 
-		if (Map.class.isAssignableFrom(clazz)) {
+		} else if (isMap(adapter)) {
 
-			JsonMap[] maps = adapter.annotation.map();
-
-			if (maps.length != 1) {
-				throw new GdxRuntimeException(
-						"@JsonSerialize annotation on Map<> requires map() property.");
-			}
-
-			JsonMap map = maps[0];
+			JsonMap map = adapter.annotation.map()[0];
 
 			return new JsonMapSerializer<>(adapter.getName(), map);
 		}
@@ -314,4 +294,11 @@ public class AnnotatedJsonSerializer<T> implements Json.Serializer<T> {
 		throw new GdxRuntimeException("Unknown container type!");
 	}
 
+	private boolean isArray(FieldAdapter adapter) {
+		return adapter.field.getType().equals(Array.class);
+	}
+
+	private boolean isMap(FieldAdapter adapter) {
+		return adapter.annotation.map().length > 0;
+	}
 }
