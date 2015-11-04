@@ -36,9 +36,20 @@ class JsonArraySerializer<V> implements Json.Serializer<Array<?>> {
 	@SuppressWarnings("unchecked")
 	public Array<?> read(Json json, JsonValue jsonData, Class type) {
 
-		Array<V> values = new Array<>();
-
 		JsonValue entry = jsonData.getChild(name);
+		JsonValue entry2 = entry;
+
+		// pre-scan size of array
+
+		int size = 0;
+		while (entry2 != null) {
+			size++;
+			entry2 = entry2.next;
+		}
+
+		// create array, read data
+
+		Array<V> values = new Array<>(size);
 
 		while (entry != null) {
 
