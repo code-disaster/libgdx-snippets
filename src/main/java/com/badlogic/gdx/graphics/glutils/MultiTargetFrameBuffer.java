@@ -17,26 +17,61 @@ import static com.badlogic.gdx.graphics.GL33Ext.*;
  */
 public class MultiTargetFrameBuffer extends GLFrameBuffer<Texture> {
 
+	public enum Format {
+
+		R32F(GL_R32F, GL_RED, GL_FLOAT),
+		RGB32F(GL_RGB32F, GL_RGB, GL_FLOAT),
+
+		PixmapFormat(GL_NONE, GL_NONE, GL_NONE);
+
+		private final int internal, format, type;
+
+		Format(int internal, int format, int type) {
+			this.internal = internal;
+			this.format = format;
+			this.type = type;
+		}
+	}
+
 	private Texture[] colorTextures;
+
 	private int depthBufferHandle;
 	private int depthStencilBufferHandle;
+
+	private static Format fbCreateFormat;
 
 	private static IntBuffer attachmentIds;
 	private static final FloatBuffer tmpColors = BufferUtils.newFloatBuffer(4);
 
 	/**
-	 * Creates a new MRT FrameBuffer with float color buffer format and the given dimensions.
+	 * Creates a new MRT FrameBuffer with the given color buffer format and dimensions.
 	 */
-	public MultiTargetFrameBuffer(int numColorBuffers, int width, int height, boolean hasDepth, boolean hasStencil) {
-		this(null, numColorBuffers, width, height, hasDepth, hasStencil);
+	public static MultiTargetFrameBuffer create(Format format, int numColorBuffers,
+												int width, int height, boolean hasDepth, boolean hasStencil) {
+
+		return create(format, null, numColorBuffers, width, height, hasDepth, hasStencil);
 	}
 
 	/**
-	 * Creates a new MRT FrameBuffer with the given format and dimensions.
+	 * Creates a new MRT FrameBuffer with the given {@link Pixmap} format and dimensions.
 	 */
-	public MultiTargetFrameBuffer(Pixmap.Format format, int numColorBuffers, int width, int height,
-								  boolean hasDepth, boolean hasStencil) {
-		super(format, width, height, false, false);
+	public static MultiTargetFrameBuffer create(Pixmap.Format pixmapFormat, int numColorBuffers,
+												int width, int height, boolean hasDepth, boolean hasStencil) {
+
+		return create(Format.PixmapFormat, pixmapFormat, numColorBuffers, width, height, hasDepth, hasStencil);
+	}
+
+	private static MultiTargetFrameBuffer create(Format format, Pixmap.Format pixmapFormat, int numColorBuffers,
+												 int width, int height, boolean hasDepth, boolean hasStencil) {
+
+		fbCreateFormat = format;
+		return new MultiTargetFrameBuffer(pixmapFormat, numColorBuffers, width, height, hasDepth, hasStencil);
+	}
+
+	private MultiTargetFrameBuffer(Pixmap.Format pixmapFormat, int numColorBuffers,
+								   int width, int height, boolean hasDepth, boolean hasStencil) {
+
+		super(pixmapFormat, width, height, false, false);
 		build(numColorBuffers, hasDepth, hasStencil);
 	}
 
@@ -116,10 +151,10 @@ public class MultiTargetFrameBuffer extends GLFrameBuffer<Texture> {
 	protected Texture createColorTexture() {
 		Texture result;
 
-		if (format != null) {
+		if (fbCreateFormat == Format.PixmapFormat) {
 			result = new Texture(width, height, format);
 		} else {
-			ColorBufferTextureData data = new ColorBufferTextureData(width, height);
+			ColorBufferTextureData data = new ColorBufferTextureData(fbCreateFormat, width, height);
 			result = new Texture(data);
 		}
 
@@ -194,10 +229,12 @@ public class MultiTargetFrameBuffer extends GLFrameBuffer<Texture> {
 
 	private static class ColorBufferTextureData implements TextureData {
 
+		private final Format format;
 		private final int width;
 		private final int height;
 
-		ColorBufferTextureData(int width, int height) {
+		ColorBufferTextureData(Format format, int width, int height) {
+			this.format = format;
 			this.width = width;
 			this.height = height;
 		}
@@ -228,7 +265,7 @@ public class MultiTargetFrameBuffer extends GLFrameBuffer<Texture> {
 
 		@Override
 		public void consumeCustomData(int target) {
-			gl30.glTexImage2D(target, 0, GL_RGB32F, width, height, 0, GL_RGB, GL_FLOAT, null);
+			gl30.glTexImage2D(target, 0, format.internal, width, height, 0, format.format, format.type, null);
 		}
 
 		@Override
