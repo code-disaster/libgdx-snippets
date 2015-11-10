@@ -5,6 +5,7 @@ import com.badlogic.gdx.utils.*;
 import com.badlogic.gdx.utils.reflect.*;
 
 import java.util.Map;
+import java.util.function.Consumer;
 
 /**
  * Generic implementation of {@link com.badlogic.gdx.utils.Json.Serializer} which uses reflection information
@@ -24,6 +25,16 @@ public class AnnotatedJsonSerializer<T> implements Json.Serializer<T> {
 		FieldAdapter(Field field) {
 			this.field = field;
 			annotation = field.getDeclaredAnnotation(JsonSerialize.class).getAnnotation(JsonSerialize.class);
+		}
+
+		void ensureAccess(Consumer<FieldAdapter> consumer) {
+			boolean accessible = field.isAccessible();
+			try {
+				field.setAccessible(true);
+				consumer.accept(this);
+			} finally {
+				field.setAccessible(accessible);
+			}
 		}
 
 		@SuppressWarnings("unchecked")
@@ -47,6 +58,7 @@ public class AnnotatedJsonSerializer<T> implements Json.Serializer<T> {
 			String name = annotation.name();
 			return name.isEmpty() ? field.getName() : name;
 		}
+
 	}
 
 	private Class<T> clazz;
@@ -89,46 +101,59 @@ public class AnnotatedJsonSerializer<T> implements Json.Serializer<T> {
 
 	private void writeObject(Json json, T object, FieldAdapter adapter) {
 
-		Object value = adapter.get(object);
+		adapter.ensureAccess(accessible -> {
 
-		Class<?> fieldType = adapter.field.getType();
+			Object value = accessible.get(object);
 
-		if (value != null) {
+			Class<?> fieldType = accessible.field.getType();
 
-			Class<?> valueType = value.getClass();
-			if (!valueType.equals(fieldType)) {
-				// todo: check for @JsonSerializable.dynamic() and warn/error
+			if (value != null) {
+
+				Class<?> valueType = value.getClass();
+				if (!valueType.equals(fieldType)) {
+					// todo: check for @JsonSerializable.dynamic() and warn/error
+				}
+
 			}
 
-		}
+			if (fieldType.isArray()) {
+				json.writeValue(accessible.getName(), value, fieldType, fieldType.getComponentType());
+			} else {
+				json.writeValue(accessible.getName(), value, fieldType);
+			}
 
-		if (fieldType.isArray()) {
-			json.writeValue(adapter.getName(), value, fieldType, fieldType.getComponentType());
-		} else {
-			json.writeValue(adapter.getName(), value, fieldType);
-		}
+		});
 	}
 
 	private void writeArray(Json json, T object, FieldAdapter adapter) {
-		Array<?> array = adapter.get(object);
-		JsonArraySerializer<?> serializer = (JsonArraySerializer<?>) adapter.serializer;
-		serializer.write(json, array, Array.class);
+
+		adapter.ensureAccess(accessible -> {
+
+			Array<?> array = accessible.get(object);
+			JsonArraySerializer<?> serializer = (JsonArraySerializer<?>) accessible.serializer;
+			serializer.write(json, array, Array.class);
+
+		});
 	}
 
 	private void writeMap(Json json, T object, FieldAdapter adapter) {
 
-		JsonMap map = adapter.annotation.map()[0];
+		adapter.ensureAccess(accessible -> {
 
-		Class<?> clazz = map.map();
-		JsonMapSerializer<?, ?> serializer = (JsonMapSerializer<?, ?>) adapter.serializer;
+			JsonMap map = accessible.annotation.map()[0];
 
-		if (Map.class.isAssignableFrom(clazz)) {
-			Map<?, ?> value = adapter.get(object);
-			serializer.write(json, value.entrySet(), Map.Entry::getKey, Map.Entry::getValue);
-		} else if (ObjectMap.class.isAssignableFrom(clazz)) {
-			ObjectMap<?, ?> value = adapter.get(object);
-			serializer.write(json, value.entries(), e -> e.key, e -> e.value);
-		}
+			Class<?> clazz = map.map();
+			JsonMapSerializer<?, ?> serializer = (JsonMapSerializer<?, ?>) accessible.serializer;
+
+			if (Map.class.isAssignableFrom(clazz)) {
+				Map<?, ?> value = accessible.get(object);
+				serializer.write(json, value.entrySet(), Map.Entry::getKey, Map.Entry::getValue);
+			} else if (ObjectMap.class.isAssignableFrom(clazz)) {
+				ObjectMap<?, ?> value = accessible.get(object);
+				serializer.write(json, value.entries(), e -> e.key, e -> e.value);
+			}
+
+		});
 	}
 
 	@Override
@@ -180,46 +205,58 @@ public class AnnotatedJsonSerializer<T> implements Json.Serializer<T> {
 
 	private void readObject(Json json, JsonValue jsonData, T object, FieldAdapter adapter) {
 
-		Class<?> fieldType = adapter.field.getType();
-		Class<?> componentType = getFieldComponentType(adapter);
+		adapter.ensureAccess(accessible -> {
 
-		Object value = json.readValue(adapter.getName(), fieldType, componentType, jsonData);
+			Class<?> fieldType = accessible.field.getType();
+			Class<?> componentType = getFieldComponentType(adapter);
 
-		if (value == null) {
-			// todo: warning
-			return;
-		}
+			Object value = json.readValue(accessible.getName(), fieldType, componentType, jsonData);
 
-		adapter.set(object, value);
+			if (value == null) {
+				// todo: warning
+				return;
+			}
+
+			accessible.set(object, value);
+
+		});
 	}
 
 	private void readArray(Json json, JsonValue jsonData, T object, FieldAdapter adapter) {
 
-		JsonArraySerializer<?> serializer = (JsonArraySerializer<?>) adapter.serializer;
-		Array<?> array = serializer.read(json, jsonData, Array.class);
+		adapter.ensureAccess(accessible -> {
 
-		if (array == null) {
-			// todo: warning
-			return;
-		}
+			JsonArraySerializer<?> serializer = (JsonArraySerializer<?>) accessible.serializer;
+			Array<?> array = serializer.read(json, jsonData, Array.class);
 
-		adapter.set(object, array);
+			if (array == null) {
+				// todo: warning
+				return;
+			}
+
+			accessible.set(object, array);
+
+		});
 	}
 
 	private void readMap(Json json, JsonValue jsonData, T object, FieldAdapter adapter) {
 
-		JsonMap map = adapter.annotation.map()[0];
+		adapter.ensureAccess(accessible -> {
 
-		Class<?> clazz = map.map();
-		JsonMapSerializer<?, ?> serializer = (JsonMapSerializer<?, ?>) adapter.serializer;
+			JsonMap map = accessible.annotation.map()[0];
 
-		if (Map.class.isAssignableFrom(clazz)) {
-			Map<?, ?> value = serializer.read(json, jsonData);
-			adapter.set(object, value);
-		} else if (ObjectMap.class.isAssignableFrom(clazz)) {
-			ObjectMap<?, ?> value = serializer.read(json, jsonData, ObjectMap::new, ObjectMap::put);
-			adapter.set(object, value);
-		}
+			Class<?> clazz = map.map();
+			JsonMapSerializer<?, ?> serializer = (JsonMapSerializer<?, ?>) accessible.serializer;
+
+			if (Map.class.isAssignableFrom(clazz)) {
+				Map<?, ?> value = serializer.read(json, jsonData);
+				accessible.set(object, value);
+			} else if (ObjectMap.class.isAssignableFrom(clazz)) {
+				ObjectMap<?, ?> value = serializer.read(json, jsonData, ObjectMap::new, ObjectMap::put);
+				accessible.set(object, value);
+			}
+
+		});
 	}
 
 	private void createSerializer(Json json) {
@@ -231,11 +268,28 @@ public class AnnotatedJsonSerializer<T> implements Json.Serializer<T> {
 
 		annotation = ClassReflection.getAnnotation(clazz, JsonSerializable.class).getAnnotation(JsonSerializable.class);
 
-		Field[] fields = ClassReflection.getFields(clazz);
-		createSerializerFields(json, fields);
+		createSerializerFields(json, clazz);
 
 		// register self to Json instance
 		json.setSerializer(clazz, this);
+	}
+
+	private void createSerializerFields(Json json, Class<?> clazz) {
+
+		if (clazz == null) {
+			return;
+		}
+
+		if (!ClassReflection.isAnnotationPresent(clazz, JsonSerializable.class)) {
+			return;
+		}
+
+		// declared fields of this class
+		Field[] fields = ClassReflection.getDeclaredFields(clazz);
+		createSerializerFields(json, fields);
+
+		// continue with super class
+		createSerializerFields(json, clazz.getSuperclass());
 	}
 
 	private void createSerializerFields(Json json, Field[] fields) {
