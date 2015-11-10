@@ -50,6 +50,7 @@ public class AnnotatedJsonSerializer<T> implements Json.Serializer<T> {
 	}
 
 	private Class<T> clazz;
+	private JsonSerializable annotation;
 	private Array<FieldAdapter> fieldAdapters = new Array<>();
 
 	public AnnotatedJsonSerializer(Json json, Class<T> clazz) {
@@ -62,9 +63,11 @@ public class AnnotatedJsonSerializer<T> implements Json.Serializer<T> {
 
 		json.writeObjectStart();
 
-		fieldAdapters.forEach(adapter -> {
+		if (annotation.dynamic()) {
+			json.writeValue("type", object.getClass().getName(), String.class);
+		}
 
-			Class<?> fieldType = adapter.field.getType();
+		fieldAdapters.forEach(adapter -> {
 
 			if (isKnownContainerType(adapter)) {
 
@@ -76,17 +79,34 @@ public class AnnotatedJsonSerializer<T> implements Json.Serializer<T> {
 
 			} else {
 
-				Object value = adapter.get(object);
+				writeObject(json, object, adapter);
 
-				if (fieldType.isArray()) {
-					json.writeValue(adapter.getName(), value, fieldType, fieldType.getComponentType());
-				} else {
-					json.writeValue(adapter.getName(), value, fieldType);
-				}
 			}
 		});
 
 		json.writeObjectEnd();
+	}
+
+	private void writeObject(Json json, T object, FieldAdapter adapter) {
+
+		Object value = adapter.get(object);
+
+		Class<?> fieldType = adapter.field.getType();
+
+		if (value != null) {
+
+			Class<?> valueType = value.getClass();
+			if (!valueType.equals(fieldType)) {
+				// todo: check for @JsonSerializable.dynamic() and warn/error
+			}
+
+		}
+
+		if (fieldType.isArray()) {
+			json.writeValue(adapter.getName(), value, fieldType, fieldType.getComponentType());
+		} else {
+			json.writeValue(adapter.getName(), value, fieldType);
+		}
 	}
 
 	private void writeArray(Json json, T object, FieldAdapter adapter) {
@@ -112,15 +132,29 @@ public class AnnotatedJsonSerializer<T> implements Json.Serializer<T> {
 	}
 
 	@Override
+	@SuppressWarnings("unchecked")
 	public T read(Json json, JsonValue jsonData, Class type) {
 
 		try {
 
-			T object = ClassReflection.newInstance(clazz);
+			T object;
+			Class<T> clazz = this.clazz;
+
+			if (annotation.dynamic()) {
+
+				String typeName = json.readValue("type", String.class, jsonData);
+				Class<?> typeClazz = Class.forName(typeName);
+
+				if (!clazz.isAssignableFrom(typeClazz)) {
+					throw new ReflectionException(clazz.getName() + " is not assignable from " + typeName);
+				}
+
+				clazz = (Class<T>) typeClazz;
+			}
+
+			object = ClassReflection.newInstance(clazz);
 
 			fieldAdapters.forEach(adapter -> {
-
-				Class<?> fieldType = adapter.field.getType();
 
 				if (isKnownContainerType(adapter)) {
 
@@ -132,23 +166,31 @@ public class AnnotatedJsonSerializer<T> implements Json.Serializer<T> {
 
 				} else {
 
-					Class<?> componentType = getFieldComponentType(adapter);
-					Object value = json.readValue(adapter.getName(), fieldType, componentType, jsonData);
+					readObject(json, jsonData, object, adapter);
 
-					if (value == null) {
-						// todo: warning
-						return;
-					}
-
-					adapter.set(object, value);
 				}
 			});
 
 			return object;
 
-		} catch (ReflectionException e) {
+		} catch (ReflectionException | ClassNotFoundException e) {
 			throw new GdxRuntimeException(e);
 		}
+	}
+
+	private void readObject(Json json, JsonValue jsonData, T object, FieldAdapter adapter) {
+
+		Class<?> fieldType = adapter.field.getType();
+		Class<?> componentType = getFieldComponentType(adapter);
+
+		Object value = json.readValue(adapter.getName(), fieldType, componentType, jsonData);
+
+		if (value == null) {
+			// todo: warning
+			return;
+		}
+
+		adapter.set(object, value);
 	}
 
 	private void readArray(Json json, JsonValue jsonData, T object, FieldAdapter adapter) {
@@ -186,6 +228,8 @@ public class AnnotatedJsonSerializer<T> implements Json.Serializer<T> {
 			throw new GdxRuntimeException("Missing @JsonSerializable annotation for '" +
 					ClassReflection.getSimpleName(clazz) + "'.");
 		}
+
+		annotation = ClassReflection.getAnnotation(clazz, JsonSerializable.class).getAnnotation(JsonSerializable.class);
 
 		Field[] fields = ClassReflection.getFields(clazz);
 		createSerializerFields(json, fields);

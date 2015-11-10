@@ -19,7 +19,9 @@ public class AnnotatedJson {
 
 		json.setSerializer(clazz, new AnnotatedJsonSerializer<>(json, clazz));
 
-		setupJson.accept(json);
+		if (setupJson != null) {
+			setupJson.accept(json);
+		}
 
 		try {
 			return json.fromJson(clazz, path);
@@ -33,10 +35,16 @@ public class AnnotatedJson {
 		Json json = new Json(JsonWriter.OutputType.json);
 		json.setSerializer(clazz, new AnnotatedJsonSerializer<>(json, clazz));
 
-		setupJson.accept(json);
+		if (setupJson != null) {
+			setupJson.accept(json);
+		}
 
 		String output = json.prettyPrint(object);
 		path.writeString(output, false, "UTF-8");
+	}
+
+	public static <T> void register(Json json, Class<T> clazz) {
+		json.setSerializer(clazz, new AnnotatedJsonSerializer<>(json, clazz));
 	}
 
 }
