@@ -18,6 +18,15 @@ public final class GL33Ext {
 
 	public static final int GL_CLAMP_TO_BORDER = 0x812D;
 
+	public static final int GL_CLIP_DISTANCE0 = 0x3000;
+	public static final int GL_CLIP_DISTANCE1 = 0x3001;
+	public static final int GL_CLIP_DISTANCE2 = 0x3002;
+	public static final int GL_CLIP_DISTANCE3 = 0x3003;
+	public static final int GL_CLIP_DISTANCE4 = 0x3004;
+	public static final int GL_CLIP_DISTANCE5 = 0x3005;
+	public static final int GL_CLIP_DISTANCE6 = 0x3006;
+	public static final int GL_CLIP_DISTANCE7 = 0x3007;
+
 	public static final int GL_INTERNALFORMAT_SUPPORTED = 0x826F;
 	public static final int GL_INTERNALFORMAT_PREFERRED = 0x8270;
 
