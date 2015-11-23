@@ -220,11 +220,20 @@ public class MultiTargetFrameBuffer extends GLFrameBuffer<Texture> {
 	}
 
 	public void clearDepthBuffer(float depth) {
-		gl30.glClearBufferfi(GL_DEPTH, 0, depth, 0);
+		synchronized (tmpColors) {
+			tmpColors.clear();
+			tmpColors.put(depth);
+			tmpColors.put(0f);
+			tmpColors.put(0f);
+			tmpColors.put(0f);
+			tmpColors.flip();
+
+			gl30.glClearBufferfv(GL_DEPTH, 0, tmpColors);
+		}
 	}
 
-	public void clearStencilBuffer(int value) {
-		gl30.glClearStencil(value);
+	public void clearDepthStencilBuffer(float depth, int stencil) {
+		gl30.glClearBufferfi(GL_DEPTH_STENCIL, 0, depth, stencil);
 	}
 
 	private static class ColorBufferTextureData implements TextureData {
