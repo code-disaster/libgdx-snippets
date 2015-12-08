@@ -1,0 +1,81 @@
+package com.badlogic.gdx.graphics.g2d;
+
+import com.badlogic.gdx.graphics.Pixmap;
+
+/**
+ * Defines a rectangular area of a {@link Pixmap}.
+ */
+public class PixmapRegion {
+
+	private final Pixmap pixmap;
+	private final int x, y;
+	private final int width, height;
+
+	public PixmapRegion(Pixmap pixmap) {
+		this(pixmap, 0, 0, pixmap.getWidth(), pixmap.getHeight());
+	}
+
+	public PixmapRegion(PixmapRegion region) {
+		this(region.pixmap, region.x, region.y, region.width, region.height);
+	}
+
+	public PixmapRegion(PixmapRegion region, int x, int y, int width, int height) {
+		this(region.pixmap, x, y, width, height);
+	}
+
+	public PixmapRegion(Pixmap pixmap, int x, int y, int width, int height) {
+		this.pixmap = pixmap;
+		this.x = x;
+		this.y = y;
+		this.width = width;
+		this.height = height;
+	}
+
+	public int getPixel(int x, int y) {
+		return pixmap.getPixel(this.x + x, this.y + y);
+	}
+
+	public void drawPixel(int x, int y, int color) {
+		pixmap.drawPixel(this.x + x, this.y + y, color);
+	}
+
+	public int getRegionX() {
+		return x;
+	}
+
+	public int getRegionY() {
+		return y;
+	}
+
+	public int getRegionWidth() {
+		return width;
+	}
+
+	public int getRegionHeight() {
+		return height;
+	}
+
+	public TextureRegion getRegion(TextureRegion region) {
+		region.setRegion(x, y, width, height);
+		return region;
+	}
+
+	public Pixmap.Format getFormat() {
+		return pixmap.getFormat();
+	}
+
+	@Override
+	public boolean equals(Object other) {
+
+		if (other instanceof PixmapRegion) {
+
+			PixmapRegion region = (PixmapRegion) other;
+
+			return (this.pixmap == region.pixmap)
+					&& (this.x == region.x) && (this.y == region.y)
+					&& (this.width == region.width) && (this.height == region.height);
+		}
+
+		return false;
+	}
+}
