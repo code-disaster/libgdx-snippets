@@ -20,6 +20,7 @@ public class MultiTargetFrameBuffer extends GLFrameBuffer<Texture> {
 	public enum Format {
 
 		R32F(GL_R32F, GL_RED, GL_FLOAT),
+		RG32F(GL_RG32F, GL_RG, GL_FLOAT),
 		RGB32F(GL_RGB32F, GL_RGB, GL_FLOAT),
 
 		PixmapFormat(GL_NONE, GL_NONE, GL_NONE);
