@@ -1,6 +1,20 @@
-# libGDX lazy snippets
+# libGDX snippets
 
 A collection of code snippets for the lazy [libGDX](https://github.com/libgdx/libgdx) user.
+
+## About
+
+#### Aim
+
+This library is not a framework, nor an engine. It is just a collection of Java classes which might prove worth (re-)using in a **libGDX desktop project**.
+
+#### Update policy
+
+You may notice that commits are done at rather strange intervals. This code is extended and improved in conjunction with our current game development project at [Robotality](http://robotality.com). I found Git submodules very cumbersome to work with, esp. when working in a team with artists and designers. That said, the *main* branch of this library is actually embedded in our game project, using this GitHub repository as a backup/mirror.
+
+This means that changes done are pretty much instantly tested in our production environment, but commits to this public repository are often lagging behind, and are done in batches.
+
+> This also means that there can be *API breaking* changes at any time!
 
 ## Outline
 
@@ -8,7 +22,6 @@ A collection of code snippets for the lazy [libGDX](https://github.com/libgdx/li
 - Written/compiled with JDK 8, and uses Java 1.8 language features. Be advised you may encounter heavy (ab)use of lambdas.
 - Invades the ```com.badlogic.gdx.*``` namespace.
 - Embeds a small native library for some utility functions.
-- (Almost) no external dependencies besides libGDX.
 
 ## Highlights
 
