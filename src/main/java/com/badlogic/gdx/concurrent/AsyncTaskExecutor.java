@@ -1,6 +1,7 @@
 package com.badlogic.gdx.concurrent;
 
 import com.badlogic.gdx.utils.Disposable;
+import com.badlogic.gdx.utils.GdxSnippets;
 
 import javax.annotation.Nonnull;
 import java.util.concurrent.*;
@@ -16,7 +17,7 @@ public class AsyncTaskExecutor implements Disposable {
 	public AsyncTaskExecutor(int threadCount) {
 
 		threadCount = Math.max(threadCount, 1);
-		System.out.println("Starting AsyncTaskExecutor with " + threadCount + " threads.");
+		GdxSnippets.log.info("Starting AsyncTaskExecutor with {} threads.", threadCount);
 
 		if (threadCount <= 1) {
 			service = Executors.newSingleThreadExecutor(new Factory("AsyncTask-Single-"));
@@ -34,7 +35,7 @@ public class AsyncTaskExecutor implements Disposable {
 	public void dispose() {
 
 		service.shutdown();
-		System.out.println("Shutting down AsyncTaskExecutor");
+		GdxSnippets.log.info("Shutting down AsyncTaskExecutor");
 
 		try {
 			service.awaitTermination(2500, TimeUnit.MILLISECONDS);

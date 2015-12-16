@@ -1,8 +1,14 @@
 apply plugin: "java"
 
 dependencies {
-    compile "com.badlogicgames.gdx:gdx:${gdxVersion}"
+    if (file("${rootProject.projectDir}/libs/gdx.jar").exists()) {
+        // note: for internal use, dependency to local libGDX version
+        compile files("${rootProject.projectDir}/libs/gdx.jar")
+    } else {
+        compile "com.badlogicgames.gdx:gdx:${gdxVersion}"
+    }
     compile "com.google.code.findbugs:jsr305:3.0.1"
+    compile "org.slf4j:slf4j-api:1.7.13"
 }
 
 sourceCompatibility = 1.8

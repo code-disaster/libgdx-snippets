@@ -39,7 +39,7 @@ public class GdxSnippetsNativesLoader {
 			}
 
 		} catch (Exception e) {
-			System.err.println(e.getMessage());
+			GdxSnippets.log.error(e.getMessage());
 		}
 
 	}

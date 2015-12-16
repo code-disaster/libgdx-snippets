@@ -1,6 +1,7 @@
 package com.badlogic.gdx.graphics;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.utils.GdxSnippets;
 
 import java.nio.LongBuffer;
 
@@ -33,7 +34,7 @@ public final class GL33Ext {
 	public static void glBlendEquationi(int buffer, int mode) {
 
 		if (!Gdx.graphics.supportsExtension("GL_ARB_draw_buffers_blend")) {
-			System.err.println("Extension ARB_draw_buffers_blend not supported!");
+			GdxSnippets.log.warn("Extension ARB_draw_buffers_blend not supported!");
 		}
 
 		nglBlendEquationi(buffer, mode);
@@ -42,7 +43,7 @@ public final class GL33Ext {
 	public static void glGetInternalFormativ(int target, int internalformat, int pname, LongBuffer params) {
 
 		if (!Gdx.graphics.supportsExtension("GL_ARB_internalformat_query2")) {
-			System.err.println("Extension ARB_internalformat_query2 not supported!");
+			GdxSnippets.log.warn("Extension ARB_internalformat_query2 not supported!");
 		}
 
 		nglGetInternalFormati64v(target, internalformat, pname, params.capacity(), params);
