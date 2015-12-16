@@ -8,4 +8,5 @@ class-path    : "../../../../../build/classes/main"
 
 includes :
     - "**/gdx/graphics/*.java"
+    - "**/gdx/profiler/*.java"
     - "**/gdx/utils/*.java"

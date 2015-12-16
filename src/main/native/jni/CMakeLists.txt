@@ -35,6 +35,8 @@ fips_begin_sharedlib(gdx-snippets-native)
         glslopt.h glslopt.cpp
     )
 
+    fips_libs(Remotery)
+
     if (FIPS_WINDOWS)
         fips_libs(OpenGL32)
     endif()
