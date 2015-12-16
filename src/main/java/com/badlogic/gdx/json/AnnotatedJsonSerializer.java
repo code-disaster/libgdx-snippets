@@ -118,6 +118,10 @@ public class AnnotatedJsonSerializer<T> implements Json.Serializer<T> {
 
 			if (fieldType.isArray()) {
 				json.writeValue(accessible.getName(), value, fieldType, fieldType.getComponentType());
+			} else if (annotation.encodeFP() && fieldType.equals(float.class)) {
+				json.writeValue(accessible.getName(), JsonFloatSerializer.encodeFloatBits((float) value), fieldType);
+			} else if (annotation.encodeFP() && fieldType.equals(double.class)) {
+				json.writeValue(accessible.getName(), JsonFloatSerializer.encodeDoubleBits((double) value), fieldType);
 			} else {
 				json.writeValue(accessible.getName(), value, fieldType);
 			}
@@ -210,7 +214,17 @@ public class AnnotatedJsonSerializer<T> implements Json.Serializer<T> {
 			Class<?> fieldType = accessible.field.getType();
 			Class<?> componentType = getFieldComponentType(adapter);
 
-			Object value = json.readValue(accessible.getName(), fieldType, componentType, jsonData);
+			Object value;
+
+			if (annotation.encodeFP() && fieldType.equals(float.class)) {
+				value = JsonFloatSerializer.decodeFloatBits(
+						json.readValue(accessible.getName(), String.class, jsonData), accessible.get(object));
+			} else if (annotation.encodeFP() && fieldType.equals(double.class)) {
+				value = JsonFloatSerializer.decodeDoubleBits(
+						json.readValue(accessible.getName(), String.class, jsonData), accessible.get(object));
+			} else {
+				value = json.readValue(accessible.getName(), fieldType, componentType, jsonData);
+			}
 
 			if (value == null) {
 				// todo: warning

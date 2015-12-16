@@ -17,4 +17,10 @@ public @interface JsonSerializable {
 	 * during deserialization to reconstruct the correct (derived) instance type.
 	 */
 	boolean dynamic() default false;
+
+	/**
+	 * If encodeFP == true, floats and doubles are written to (and parsed from) JSON as special format strings.
+	 * @see com.badlogic.gdx.json.JsonFloatSerializer
+	 */
+	boolean encodeFP() default false;
 }

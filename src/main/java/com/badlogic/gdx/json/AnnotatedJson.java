@@ -47,4 +47,8 @@ public class AnnotatedJson {
 		json.setSerializer(clazz, new AnnotatedJsonSerializer<>(json, clazz));
 	}
 
+	public static <T> void register(Json json, Class<T> clazz, Json.Serializer<T> serializer) {
+		json.setSerializer(clazz, serializer);
+	}
+
 }
