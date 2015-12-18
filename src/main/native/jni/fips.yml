@@ -5,4 +5,4 @@ imports:
     fips-glsl-optimizer:
         git: https://github.com/code-disaster/fips-glsl-optimizer
     fips-remotery:
-        git: https://github.com/floooh/fips-remotery
+        git: https://github.com/code-disaster/fips-remotery
