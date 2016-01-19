@@ -49,7 +49,7 @@ class JsonArraySerializer<V> implements Json.Serializer<Array<?>> {
 
 		// create array, read data
 
-		Array<V> values = new Array<>(size);
+		Array<V> values = new Array<>(array.ordered(), size);
 
 		while (entry != null) {
 
