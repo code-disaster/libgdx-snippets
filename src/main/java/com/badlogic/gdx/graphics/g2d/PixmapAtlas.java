@@ -16,6 +16,10 @@ public class PixmapAtlas implements Disposable {
 	private final Array<AtlasPage> pages = new Array<>();
 	private final Array<AtlasRegion> regions = new Array<>();
 
+	public PixmapAtlas(FileHandle packFile) {
+		this(packFile, packFile.parent(), false);
+	}
+
 	public PixmapAtlas(FileHandle packFile, FileHandle imagesDir, boolean flip) {
 		this(new TextureAtlas.TextureAtlasData(packFile, imagesDir, flip));
 	}
