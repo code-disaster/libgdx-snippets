@@ -5,6 +5,8 @@ import com.badlogic.gdx.utils.BufferUtils;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 
+import static com.badlogic.gdx.Gdx.gl30;
+import static com.badlogic.gdx.graphics.GL20.GL_TRIANGLES;
 import static com.badlogic.gdx.graphics.GL30.GL_ARRAY_BUFFER;
 
 /**
@@ -25,6 +27,10 @@ public class VertexBufferObjectExt extends GLBufferObject<FloatBuffer> {
 
 	public void addVertices(float[] vertices, int count) {
 		buffer.put(vertices, 0, count);
+	}
+
+	public void drawArrays(int count, int offset) {
+		gl30.glDrawArrays(GL_TRIANGLES, offset, count);
 	}
 
 	@Override

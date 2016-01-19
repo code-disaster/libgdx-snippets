@@ -66,7 +66,7 @@ public final class GL33Ext {
 	*/
 
 	public static native void glDrawElementsBaseVertex(int mode, int count, int type, int indices, int baseVertex); /*
-		glDrawElementsBaseVertex(mode, count, type, (const void*) indices, baseVertex);
+		glDrawElementsBaseVertex(mode, count, type, (const void*) ((size_t) indices), baseVertex);
 	*/
 
 	private static native void nglGetInternalFormati64v(int target, int internalformat,
