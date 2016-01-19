@@ -62,10 +62,15 @@ public class MultiTargetFrameBuffer extends GLFrameBuffer<Texture> {
 		return create(Format.PixmapFormat, pixmapFormat, numColorBuffers, width, height, hasDepth, hasStencil);
 	}
 
-	private static MultiTargetFrameBuffer create(Format format, Pixmap.Format pixmapFormat, int numColorBuffers,
-												 int width, int height, boolean hasDepth, boolean hasStencil) {
+	/**
+	 * Creates a new MRT FrameBuffer with the given color buffer format and dimensions. If the format is
+	 * {@link Format#PixmapFormat}, the pixmapFormat parameter is used, otherwise it is ignored.
+	 */
+	public static MultiTargetFrameBuffer create(Format format, Pixmap.Format pixmapFormat, int numColorBuffers,
+												int width, int height, boolean hasDepth, boolean hasStencil) {
 
 		fbCreateFormat = format;
+		pixmapFormat = format == Format.PixmapFormat ? pixmapFormat : null;
 		return new MultiTargetFrameBuffer(pixmapFormat, numColorBuffers, width, height, hasDepth, hasStencil);
 	}
 
@@ -153,7 +158,10 @@ public class MultiTargetFrameBuffer extends GLFrameBuffer<Texture> {
 		Texture result;
 
 		if (fbCreateFormat == Format.PixmapFormat) {
-			result = new Texture(width, height, format);
+			int glFormat = Pixmap.Format.toGlFormat(format);
+			int glType = Pixmap.Format.toGlType(format);
+			GLOnlyTextureData data = new GLOnlyTextureData(width, height, 0, glFormat, glFormat, glType);
+			result = new Texture(data);
 		} else {
 			ColorBufferTextureData data = new ColorBufferTextureData(fbCreateFormat, width, height);
 			result = new Texture(data);
@@ -205,7 +213,35 @@ public class MultiTargetFrameBuffer extends GLFrameBuffer<Texture> {
 		gl30.glBindTexture(GL_TEXTURE_2D, 0);
 	}
 
-	public void clearColorBuffer(Color color, int... indices) {
+	public void clearColorBuffer(Color color, int index) {
+		synchronized (tmpColors) {
+			tmpColors.clear();
+			tmpColors.put(color.r);
+			tmpColors.put(color.g);
+			tmpColors.put(color.b);
+			tmpColors.put(color.a);
+			tmpColors.flip();
+
+			gl30.glClearBufferfv(GL_COLOR, index, tmpColors);
+		}
+	}
+
+	public void clearColorBuffers(Color color) {
+		synchronized (tmpColors) {
+			tmpColors.clear();
+			tmpColors.put(color.r);
+			tmpColors.put(color.g);
+			tmpColors.put(color.b);
+			tmpColors.put(color.a);
+			tmpColors.flip();
+
+			for (int index = 0; index < colorTextures.length; index++) {
+				gl30.glClearBufferfv(GL_COLOR, index, tmpColors);
+			}
+		}
+	}
+
+	public void clearColorBuffers(Color color, int[] indices) {
 		synchronized (tmpColors) {
 			tmpColors.clear();
 			tmpColors.put(color.r);
