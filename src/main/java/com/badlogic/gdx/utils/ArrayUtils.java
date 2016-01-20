@@ -34,11 +34,36 @@ public class ArrayUtils {
 	}
 
 	/**
+	 * Convenience function to iterate an array. Stops if user-supplied function returns False.
+	 */
+	public static <T> void forEachWhile(Array<T> array, Function<T, Boolean> action) {
+		for (T t : array) {
+			if (!action.apply(t)) {
+				break;
+			}
+		}
+	}
+
+	/**
 	 * Iterates the array, and returns the first item which fulfills the user-defined comparison.
 	 * <p>
 	 * Returns null if no match is found.
 	 */
 	public static <T> T find(T[] array, Function<T, Boolean> match) {
+		for (T t : array) {
+			if (match.apply(t)) {
+				return t;
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Iterates the array, and returns the first item which fulfills the user-defined comparison.
+	 * <p>
+	 * Returns null if no match is found.
+	 */
+	public static <T> T find(Array<T> array, Function<T, Boolean> match) {
 		for (T t : array) {
 			if (match.apply(t)) {
 				return t;
@@ -55,6 +80,20 @@ public class ArrayUtils {
 	public static <T> int findIndex(T[] array, Function<T, Boolean> match) {
 		for (int i = 0; i < array.length; i++) {
 			if (match.apply(array[i])) {
+				return i;
+			}
+		}
+		return -1;
+	}
+
+	/**
+	 * Iterates the array, and returns the index of the first item which fulfills the user-defined comparison.
+	 * <p>
+	 * Returns -1 if no match is found.
+	 */
+	public static <T> int findIndex(Array<T> array, Function<T, Boolean> match) {
+		for (int i = 0; i < array.size; i++) {
+			if (match.apply(array.get(i))) {
 				return i;
 			}
 		}
@@ -148,6 +187,13 @@ public class ArrayUtils {
 	}
 
 	/**
+	 * Returns an {@link Iterable} interface wrapped around an {@link Array}, in ascending order.
+	 */
+	public static <T> Iterable<T> asIterable(Array<T> array) {
+		return asIterable(array, false);
+	}
+
+	/**
 	 * Returns an {@link Iterable} interface wrapped around an array, in ascending or descending order.
 	 *
 	 * <pre>
@@ -158,7 +204,18 @@ public class ArrayUtils {
 	 * </pre>
 	 */
 	public static <T> Iterable<T> asIterable(T[] array, boolean descending) {
-		return () -> descending ? new DescendingArrayIterator<>(array) : new ArrayIterator<>(array);
+		return () -> descending
+				? new DescendingArrayIterator<>(array, array.length)
+				: new ArrayIterator<>(array, array.length);
+	}
+
+	/**
+	 * Returns an {@link Iterable} interface wrapped around an {@link Array}, in ascending or descending order.
+	 */
+	public static <T> Iterable<T> asIterable(Array<T> array, boolean descending) {
+		return () -> descending
+				? new DescendingArrayIterator<>(array.items, array.size)
+				: new ArrayIterator<>(array.items, array.size);
 	}
 
 	/**
@@ -188,32 +245,34 @@ public class ArrayUtils {
 	private abstract static class AbstractArrayIterator<T> implements Iterator<T> {
 
 		protected final T[] array;
+		protected final int size;
 		protected int index = 0;
 
-		AbstractArrayIterator(T[] array) {
+		AbstractArrayIterator(T[] array, int size) {
 			this.array = array;
+			this.size = size;
 		}
 
 	}
 
 	private static class ArrayIterator<T> extends AbstractArrayIterator<T> {
 
-		ArrayIterator(T[] array) {
-			super(array);
+		ArrayIterator(T[] array, int size) {
+			super(array, size);
 		}
 
 		ArrayIterator(AbstractArrayIterator<T> other) {
-			super(other.array);
+			super(other.array, other.size);
 		}
 
 		@Override
 		public boolean hasNext() {
-			return index < array.length;
+			return index < size;
 		}
 
 		@Override
 		public T next() {
-			if (index < array.length) {
+			if (index < size) {
 				return array[index++];
 			}
 			throw new NoSuchElementException("Out of bounds!");
@@ -222,14 +281,14 @@ public class ArrayUtils {
 
 	private static class DescendingArrayIterator<T> extends AbstractArrayIterator<T> {
 
-		DescendingArrayIterator(T[] array) {
-			super(array);
-			index = array.length - 1;
+		DescendingArrayIterator(T[] array, int size) {
+			super(array, size);
+			index = this.size - 1;
 		}
 
 		DescendingArrayIterator(AbstractArrayIterator<T> other) {
-			super(other.array);
-			index = other.array.length - 1;
+			super(other.array, other.size);
+			index = other.size - 1;
 		}
 
 		@Override
@@ -257,6 +316,16 @@ public class ArrayUtils {
 	}
 
 	/**
+	 * Returns a {@link Collection} interface wrapped around an {@link Array}.
+	 * <p>
+	 * The collection returned does not support any operation manipulating the array. Its main purpose (and
+	 * difference to {@link ArrayUtils#asIterable(Object[])}) is to expose the {@link Collection#size()} function.
+	 */
+	public static <T> Collection<T> asCollection(Array<T> array) {
+		return new ArrayCollection<>(array);
+	}
+
+	/**
 	 * Returns a second interface to the {@link Collection} passed.
 	 * <p>
 	 * The argument must be the result of a previous call to this function, or to
@@ -272,23 +341,31 @@ public class ArrayUtils {
 	private static class ArrayCollection<T> extends AbstractCollection<T> {
 
 		private final T[] array;
+		private final int size;
 
 		ArrayCollection(T[] array) {
 			this.array = array;
+			this.size = array.length;
+		}
+
+		ArrayCollection(Array<T> array) {
+			this.array = array.items;
+			this.size = array.size;
 		}
 
 		ArrayCollection(ArrayCollection<T> other) {
 			this.array = other.array;
+			this.size = other.size;
 		}
 
 		@Override
 		public @Nonnull Iterator<T> iterator() {
-			return new ArrayIterator<>(array);
+			return new ArrayIterator<>(array, size);
 		}
 
 		@Override
 		public int size() {
-			return array.length;
+			return size;
 		}
 	}
 
