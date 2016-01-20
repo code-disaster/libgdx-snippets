@@ -32,12 +32,14 @@ public class PixmapAtlas implements Disposable {
 
 		ObjectMap<TextureAtlas.TextureAtlasData.Page, AtlasPage> pageToPixmap = new ObjectMap<>();
 
-		for (TextureAtlas.TextureAtlasData.Page page : data.pages) {
+		for (int pageIndex = 0; pageIndex < data.pages.size; pageIndex++) {
+
+			TextureAtlas.TextureAtlasData.Page page = data.pages.get(pageIndex);
 
 			Pixmap pixmap = new Pixmap(page.textureFile);
 			pixmaps.add(pixmap);
 
-			AtlasPage atlasPage = new AtlasPage(page.textureFile, pixmap);
+			AtlasPage atlasPage = new AtlasPage(pageIndex, page.textureFile, pixmap);
 			pages.add(atlasPage);
 
 			pageToPixmap.put(page, atlasPage);
@@ -107,10 +109,12 @@ public class PixmapAtlas implements Disposable {
 
 	public static class AtlasPage {
 
+		public final int pageIndex;
 		public final FileHandle fileHandle;
 		public final Pixmap pixmap;
 
-		AtlasPage(FileHandle fileHandle, Pixmap pixmap) {
+		AtlasPage(int pageIndex, FileHandle fileHandle, Pixmap pixmap) {
+			this.pageIndex = pageIndex;
 			this.fileHandle = fileHandle;
 			this.pixmap = pixmap;
 		}
