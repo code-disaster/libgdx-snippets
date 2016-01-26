@@ -10,6 +10,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class Remotery implements Profiler {
 
 	private static boolean initialized = false;
+	private static boolean initializedOpenGL = false;
 
 	private static Map<String, Long> threadNames = new ConcurrentHashMap<>();
 	private static Map<String, Sample> cacheCPUSamples = new ConcurrentHashMap<>();
@@ -80,7 +81,7 @@ public class Remotery implements Profiler {
 		}
 
 		if (pointer != 0) {
-			rtmSetCurrentThreadName(pointer);
+			rmtSetCurrentThreadName(pointer);
 		}
 	}
 
@@ -114,6 +115,22 @@ public class Remotery implements Profiler {
 		}
 	}
 
+	public static void bindOpenGL() {
+
+		if (initialized && !initializedOpenGL) {
+			rmtBindOpenGL();
+			initializedOpenGL = true;
+		}
+	}
+
+	public static void unbindOpenGL() {
+
+		if (initializedOpenGL) {
+			rmtUnbindOpenGL();
+			initializedOpenGL = false;
+		}
+	}
+
 	public static void beginOpenGLSample(String name) {
 
 		Sample sample = cacheOpenGLSamples.getOrDefault(name, defaultSample);
@@ -133,13 +150,13 @@ public class Remotery implements Profiler {
 	@Override
 	public void sampleOpenGL(String name, Runnable runnable) {
 
-		if (initialized) {
+		if (initializedOpenGL) {
 			beginOpenGLSample(name);
 		}
 
 		runnable.run();
 
-		if (initialized) {
+		if (initializedOpenGL) {
 			endOpenGLSample();
 		}
 	}
@@ -174,7 +191,7 @@ public class Remotery implements Profiler {
 		remotery = NULL;
 	*/
 
-	private static native void rtmSetCurrentThreadName(long pointer); /*
+	private static native void rmtSetCurrentThreadName(long pointer); /*
 		rmt_SetCurrentThreadName((const char*) pointer);
 	*/
 
@@ -192,11 +209,11 @@ public class Remotery implements Profiler {
 		rmt_EndCPUSample();
 	*/
 
-	public static native void bindOpenGL(); /*
+	public static native void rmtBindOpenGL(); /*
 		rmt_BindOpenGL();
 	*/
 
-	public static native void unbindOpenGL(); /*
+	public static native void rmtUnbindOpenGL(); /*
 		rmt_UnbindOpenGL();
 	*/
 
