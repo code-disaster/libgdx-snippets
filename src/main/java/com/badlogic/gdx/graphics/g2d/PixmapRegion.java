@@ -20,7 +20,7 @@ public class PixmapRegion {
 	}
 
 	public PixmapRegion(PixmapRegion region) {
-		this(region.pixmap, region.x, region.y, region.width, region.height);
+		setRegion(region);
 	}
 
 	public PixmapRegion(PixmapRegion region, int x, int y, int width, int height) {
@@ -45,6 +45,14 @@ public class PixmapRegion {
 
 	public void drawPixel(int x, int y, int color) {
 		pixmap.drawPixel(this.x + x, this.y + y, color);
+	}
+
+	public void setRegion(PixmapRegion region) {
+		this.pixmap = region.pixmap;
+		this.x = region.x;
+		this.y = region.y;
+		this.width = region.width;
+		this.height = region.height;
 	}
 
 	public void setRegion(Pixmap pixmap, int x, int y, int width, int height) {

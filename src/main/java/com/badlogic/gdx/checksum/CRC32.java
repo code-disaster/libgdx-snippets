@@ -90,35 +90,17 @@ public class CRC32 {
 		return CRC32.update(new CRC32(0), buffer, 0, buffer.length);
 	}
 
+	public static CRC32 calculate(CRC32 checksum, byte[] buffer) {
+		checksum.value = 0;
+		return CRC32.update(checksum, buffer, 0, buffer.length);
+	}
+
 	public static CRC32 calculateString(String text) {
 		return CRC32.calculate(text.getBytes());
 	}
 
-	public static CRC32 calculateStrings(String... texts) {
-		CRC32 result = new CRC32(0);
-
-		for (String text : texts) {
-			result = CRC32.update(result, text.getBytes(), 0, text.length());
-		}
-
-		return result;
-	}
-
-	public static CRC32 calculateStringNormalized(String text) {
-		String normalizedText = text.toUpperCase().replaceAll("\\s|\\W", "_");
-		return CRC32.calculate(normalizedText.getBytes());
-	}
-
-	public static CRC32 calculateStringsNormalized(String... texts) {
-		CRC32 result = new CRC32(0);
-
-		for (String text : texts)
-		{
-			String normalizedText = text.toUpperCase().replaceAll("\\s|\\W", "_");
-			result = CRC32.update(result, normalizedText.getBytes(), 0, normalizedText.length());
-		}
-
-		return result;
+	public static CRC32 calculateString(CRC32 checksum, String text) {
+		return CRC32.calculate(checksum, text.getBytes());
 	}
 
 	public static CRC32 update(CRC32 checksum, byte buffer[], int offset, int length) {
