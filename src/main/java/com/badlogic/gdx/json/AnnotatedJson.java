@@ -39,8 +39,10 @@ public class AnnotatedJson {
 			setupJson.accept(json);
 		}
 
-		String output = json.prettyPrint(object);
-		path.writeString(output, false, "UTF-8");
+		String output = json.toJson(object);
+		String prettyOutput = json.prettyPrint(output);
+
+		path.writeString(prettyOutput, false, "UTF-8");
 	}
 
 	public static <T> void register(Json json, Class<T> clazz) {

@@ -23,4 +23,10 @@ public @interface JsonSerializable {
 	 * @see com.badlogic.gdx.json.JsonFloatSerializer
 	 */
 	boolean encodeFP() default false;
+
+	/**
+	 * By default, null values are not written to JSON.
+	 */
+	boolean writeNull() default false;
+
 }

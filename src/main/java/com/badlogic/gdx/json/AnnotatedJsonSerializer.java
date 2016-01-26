@@ -114,6 +114,12 @@ public class AnnotatedJsonSerializer<T> implements Json.Serializer<T> {
 					// todo: check for @JsonSerializable.dynamic() and warn/error
 				}
 
+			} else {
+
+				if (!annotation.writeNull()) {
+					return;
+				}
+
 			}
 
 			if (fieldType.isArray()) {
