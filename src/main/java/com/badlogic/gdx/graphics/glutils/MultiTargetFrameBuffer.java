@@ -23,6 +23,8 @@ public class MultiTargetFrameBuffer extends GLFrameBuffer<Texture> {
 		RG32F(GL_RG32F, GL_RG, GL_FLOAT),
 		RGB32F(GL_RGB32F, GL_RGB, GL_FLOAT),
 
+		R8(GL_R8, GL_RED, GL_UNSIGNED_BYTE),
+
 		PixmapFormat(GL_NONE, GL_NONE, GL_NONE);
 
 		private final int internal, format, type;
@@ -260,9 +262,6 @@ public class MultiTargetFrameBuffer extends GLFrameBuffer<Texture> {
 		synchronized (tmpColors) {
 			tmpColors.clear();
 			tmpColors.put(depth);
-			tmpColors.put(0f);
-			tmpColors.put(0f);
-			tmpColors.put(0f);
 			tmpColors.flip();
 
 			gl30.glClearBufferfv(GL_DEPTH, 0, tmpColors);
