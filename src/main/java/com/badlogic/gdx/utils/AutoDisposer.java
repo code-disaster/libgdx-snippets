@@ -61,6 +61,9 @@ public class AutoDisposer {
 				Object fieldObject = field.get(object);
 				Class<?> fieldType = field.getType();
 
+				// set the field to 0
+				field.set(object, null);
+
 				if (!accessible) {
 					field.setAccessible(false);
 				}
