@@ -19,6 +19,12 @@ public @interface JsonSerializable {
 	boolean dynamic() default false;
 
 	/**
+	 * If fullyQualifiedClassTag == true, this class does not register a tag, which means that the fully
+	 * qualified class name is written if dynamic == true.
+	 */
+	boolean fullyQualifiedClassTag() default false;
+
+	/**
 	 * If encodeFP == true, floats and doubles are written to (and parsed from) JSON as special format strings.
 	 * @see com.badlogic.gdx.json.JsonFloatSerializer
 	 */

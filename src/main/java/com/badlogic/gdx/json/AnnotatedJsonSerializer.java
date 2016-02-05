@@ -233,8 +233,23 @@ public class AnnotatedJsonSerializer<T> implements Json.Serializer<T> {
 			}
 
 			if (value == null) {
-				// todo: warning
-				return;
+
+				// if the parent annotation allows writing of null, do nothing here
+				if (annotation.writeNull()) {
+					return;
+				}
+
+				// if the field is @JsonSerializable too, create a default instance
+				if (ClassReflection.isAnnotationPresent(fieldType, JsonSerializable.class)) {
+					try {
+						value = ClassReflection.newInstance(fieldType);
+					} catch (ReflectionException e) {
+						throw new GdxRuntimeException(e);
+					}
+				} else {
+					return;
+				}
+
 			}
 
 			accessible.set(object, value);
@@ -292,6 +307,11 @@ public class AnnotatedJsonSerializer<T> implements Json.Serializer<T> {
 
 		// register self to Json instance
 		json.setSerializer(clazz, this);
+
+		// register class TAG for 'dynamic' types
+		if (annotation.dynamic() && !annotation.fullyQualifiedClassTag()) {
+			json.addClassTag(clazz.getSimpleName(), clazz);
+		}
 	}
 
 	private void createSerializerFields(Json json, Class<?> clazz) {
