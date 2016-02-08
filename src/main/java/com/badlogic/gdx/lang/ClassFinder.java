@@ -46,6 +46,20 @@ public class ClassFinder {
 	}
 
 	/**
+	 * Only uses the same URL as the given class was loaded from.
+	 *
+	 * Must be called before {@link ClassFinder#process(Predicate, Consumer)}.
+	 */
+	public ClassFinder filterURLforClass(Class<?> clazz) {
+
+		// todo: this may not work because of SecurityManager
+		URL url = clazz.getProtectionDomain().getCodeSource().getLocation();
+		urls.add(url);
+
+		return this;
+	}
+
+	/**
 	 * Iterates classes of all URLs filtered by a previous call of {@link ClassFinder#filter(Predicate)}.
 	 */
 	public ClassFinder process(Predicate<String> filter, Consumer<Class<?>> processor) {
