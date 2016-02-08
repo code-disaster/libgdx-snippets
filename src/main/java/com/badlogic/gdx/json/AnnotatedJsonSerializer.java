@@ -76,7 +76,18 @@ public class AnnotatedJsonSerializer<T> implements Json.Serializer<T> {
 		json.writeObjectStart();
 
 		if (annotation.dynamic()) {
-			json.writeValue("type", object.getClass().getName(), String.class);
+
+			String typeName = null;
+
+			if (!annotation.fullyQualifiedClassTag()) {
+				typeName = json.getTag(object.getClass());
+			}
+
+			if (typeName == null) {
+				typeName = object.getClass().getName();
+			}
+
+			json.writeValue("type", typeName, String.class);
 		}
 
 		fieldAdapters.forEach(adapter -> {
@@ -178,7 +189,20 @@ public class AnnotatedJsonSerializer<T> implements Json.Serializer<T> {
 			if (annotation.dynamic()) {
 
 				String typeName = json.readValue("type", String.class, jsonData);
-				Class<?> typeClazz = Class.forName(typeName);
+
+				Class<?> typeClazz = null;
+
+				if (!annotation.fullyQualifiedClassTag()) {
+					typeClazz = json.getClass(typeName);
+				}
+
+				if (typeClazz == null) {
+					typeClazz = Class.forName(typeName);
+				}
+
+				if (typeClazz == null) {
+					throw new ClassNotFoundException("Class " + typeName + " not found");
+				}
 
 				if (!clazz.isAssignableFrom(typeClazz)) {
 					throw new ReflectionException(clazz.getName() + " is not assignable from " + typeName);
