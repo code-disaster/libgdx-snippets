@@ -232,7 +232,7 @@ public class Remotery implements Profiler {
 	*/
 
 	private static native long strdupNativeName(String name); /*
-		return (long) strdup(name);
+		return (int64_t) strdup(name);
 	*/
 
 	private static native void freeNativeName(long pointer); /*
