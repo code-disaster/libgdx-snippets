@@ -72,7 +72,7 @@ public final class GL33Ext {
 	private static native void nglGetInternalFormati64v(int target, int internalformat,
 														int pname, int bufSize, LongBuffer params); /*
 		if (FLEXT_ARB_internalformat_query2) {
-			glGetInternalformati64v(target, internalformat, pname, bufSize, params);
+			glGetInternalformati64v(target, internalformat, pname, bufSize, (GLint64*) params);
 		}
 	*/
 
