@@ -3,11 +3,13 @@ package com.badlogic.gdx.graphics.glutils;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.utils.BufferUtils;
 
-import java.nio.*;
+import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
 
-import static com.badlogic.gdx.Gdx.*;
+import static com.badlogic.gdx.Gdx.gl30;
 import static com.badlogic.gdx.graphics.GL30.*;
-import static com.badlogic.gdx.graphics.GL33Ext.*;
+import static com.badlogic.gdx.graphics.GL33Ext.GL_CLAMP_TO_BORDER;
+import static com.badlogic.gdx.graphics.GL33Ext.GL_TEXTURE_BORDER_COLOR;
 
 /**
  * An extension to {@link FrameBuffer} with multiple color attachments. Can be used as
@@ -41,7 +43,7 @@ public class MultiTargetFrameBuffer extends GLFrameBuffer<Texture> {
 	private int depthBufferHandle;
 	private int depthStencilBufferHandle;
 
-	private static Format fbCreateFormat;
+	private static Format[] fbCreateFormats;
 
 	private static IntBuffer attachmentIds;
 	private static final FloatBuffer tmpColors = BufferUtils.newFloatBuffer(4);
@@ -71,16 +73,35 @@ public class MultiTargetFrameBuffer extends GLFrameBuffer<Texture> {
 	public static MultiTargetFrameBuffer create(Format format, Pixmap.Format pixmapFormat, int numColorBuffers,
 												int width, int height, boolean hasDepth, boolean hasStencil) {
 
-		fbCreateFormat = format;
-		pixmapFormat = format == Format.PixmapFormat ? pixmapFormat : null;
-		return new MultiTargetFrameBuffer(pixmapFormat, numColorBuffers, width, height, hasDepth, hasStencil);
+		fbCreateFormats = new Format[numColorBuffers];
+		Pixmap.Format[] formats = new Pixmap.Format[numColorBuffers];
+
+		for (int i = 0; i < numColorBuffers; i++) {
+			fbCreateFormats[i] = format;
+			formats[i] = format == Format.PixmapFormat ? pixmapFormat : null;
+		}
+
+		return new MultiTargetFrameBuffer(formats, width, height, hasDepth, hasStencil);
 	}
 
-	private MultiTargetFrameBuffer(Pixmap.Format pixmapFormat, int numColorBuffers,
+	/**
+	 * Creates a new MRT FrameBuffer with the given color buffer formats and dimensions.
+	 *
+	 * This function equals {@link MultiTargetFrameBuffer#create(Format, Pixmap.Format, int, int, int, boolean, boolean)}
+	 * but individually describes the format for each color buffer.
+	 */
+	public static MultiTargetFrameBuffer create(Format[] formats, Pixmap.Format[] pixmapFormats,
+												int width, int height, boolean hasDepth, boolean hasStencil) {
+
+		fbCreateFormats = formats;
+		return new MultiTargetFrameBuffer(pixmapFormats, width, height, hasDepth, hasStencil);
+	}
+
+	private MultiTargetFrameBuffer(Pixmap.Format[] pixmapFormats,
 								   int width, int height, boolean hasDepth, boolean hasStencil) {
 
-		super(pixmapFormat, width, height, false, false);
-		build(numColorBuffers, hasDepth, hasStencil);
+		super(pixmapFormats[0], width, height, false, false);
+		build(pixmapFormats, hasDepth, hasStencil);
 	}
 
 	/**
@@ -88,31 +109,31 @@ public class MultiTargetFrameBuffer extends GLFrameBuffer<Texture> {
 	 * This is done after the initial creation in {@link GLFrameBuffer#build()}, so glCheckFramebufferStatus() is
 	 * called again.
 	 */
-	private void build(int numColorBuffers, boolean hasDepth, boolean hasStencil) {
+	private void build(Pixmap.Format[] formats, boolean hasDepth, boolean hasStencil) {
 
 		bind();
 
 		// create and attach additional color buffers
 
-		colorTextures = new Texture[numColorBuffers];
+		colorTextures = new Texture[formats.length];
 		colorTextures[0] = colorTexture;
 
-		for (int i = 1; i < numColorBuffers; i++) {
-			colorTextures[i] = createColorTexture();
+		for (int i = 1; i < formats.length; i++) {
+			colorTextures[i] = createColorTexture(i, formats);
 			gl30.glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, GL_TEXTURE_2D,
 					colorTextures[i].getTextureObjectHandle(), 0);
 		}
 
 		synchronized (MultiTargetFrameBuffer.class) {
 
-			if (attachmentIds == null || numColorBuffers > attachmentIds.capacity()) {
-				attachmentIds = BufferUtils.newIntBuffer(numColorBuffers);
-				for (int i = 0; i < numColorBuffers; i++) {
+			if (attachmentIds == null || formats.length > attachmentIds.capacity()) {
+				attachmentIds = BufferUtils.newIntBuffer(formats.length);
+				for (int i = 0; i < formats.length; i++) {
 					attachmentIds.put(i, GL_COLOR_ATTACHMENT0 + i);
 				}
 			}
 
-			gl30.glDrawBuffers(numColorBuffers, attachmentIds);
+			gl30.glDrawBuffers(formats.length, attachmentIds);
 		}
 
 		// depth texture, or depth/stencil render target
@@ -157,15 +178,19 @@ public class MultiTargetFrameBuffer extends GLFrameBuffer<Texture> {
 
 	@Override
 	protected Texture createColorTexture() {
+		return createColorTexture(0, new Pixmap.Format[] { format });
+	}
+
+	private Texture createColorTexture(int index, Pixmap.Format[] formats) {
 		Texture result;
 
-		if (fbCreateFormat == Format.PixmapFormat) {
-			int glFormat = Pixmap.Format.toGlFormat(format);
-			int glType = Pixmap.Format.toGlType(format);
+		if (fbCreateFormats[index] == Format.PixmapFormat) {
+			int glFormat = Pixmap.Format.toGlFormat(formats[index]);
+			int glType = Pixmap.Format.toGlType(formats[index]);
 			GLOnlyTextureData data = new GLOnlyTextureData(width, height, 0, glFormat, glFormat, glType);
 			result = new Texture(data);
 		} else {
-			ColorBufferTextureData data = new ColorBufferTextureData(fbCreateFormat, width, height);
+			ColorBufferTextureData data = new ColorBufferTextureData(fbCreateFormats[index], width, height);
 			result = new Texture(data);
 		}
 
