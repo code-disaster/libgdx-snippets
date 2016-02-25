@@ -140,22 +140,24 @@ public class SHA1FileTable {
 
 	private SHA1 processFile(File file) throws IOException, NoSuchAlgorithmException {
 
-		BufferedInputStream input = new BufferedInputStream(new FileInputStream(file));
+		try (BufferedInputStream input = new BufferedInputStream(new FileInputStream(file))) {
 
-		SHA1 sha1 = SHA1.create();
+			SHA1 sha1 = SHA1.create();
 
-		int n = 0;
-		byte[] buffer = new byte[8192];
-		while (n != -1) {
-			n = input.read(buffer);
-			if (n > 0) {
-				SHA1.update(sha1, buffer, 0, n);
+			int n = 0;
+			byte[] buffer = new byte[8192];
+			while (n != -1) {
+				n = input.read(buffer);
+				if (n > 0) {
+					SHA1.update(sha1, buffer, 0, n);
+				}
 			}
+
+			SHA1.submit(sha1);
+
+			return sha1;
+
 		}
-
-		SHA1.submit(sha1);
-
-		return sha1;
 	}
 
 }

@@ -1,5 +1,7 @@
 package com.badlogic.gdx.checksum;
 
+import java.nio.charset.Charset;
+
 public class CRC32 {
 
 	/**
@@ -42,6 +44,8 @@ public class CRC32 {
 	private int value;
 
 	public static final CRC32 Zero = CRC32.valueOf(0);
+
+	private static final Charset charset = Charset.defaultCharset();
 
 	private CRC32(int value) {
 		this.value = value;
@@ -96,11 +100,11 @@ public class CRC32 {
 	}
 
 	public static CRC32 calculateString(String text) {
-		return CRC32.calculate(text.getBytes());
+		return CRC32.calculate(text.getBytes(charset));
 	}
 
 	public static CRC32 calculateString(CRC32 checksum, String text) {
-		return CRC32.calculate(checksum, text.getBytes());
+		return CRC32.calculate(checksum, text.getBytes(charset));
 	}
 
 	public static CRC32 update(CRC32 checksum, byte buffer[], int offset, int length) {
@@ -117,6 +121,6 @@ public class CRC32 {
 	}
 
 	public static CRC32 updateString(CRC32 checksum, String text) {
-		return update(checksum, text.getBytes(), 0, text.length());
+		return update(checksum, text.getBytes(charset), 0, text.length());
 	}
 }

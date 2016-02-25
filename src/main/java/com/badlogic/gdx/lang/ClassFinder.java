@@ -74,9 +74,7 @@ public class ClassFinder {
 
 			} else if (file.extension().equals("jar")) {
 
-				try {
-
-					JarFile jar = new JarFile(file.file());
+				try (JarFile jar = new JarFile(file.file())) {
 
 					Enumeration<JarEntry> entries = jar.entries();
 
