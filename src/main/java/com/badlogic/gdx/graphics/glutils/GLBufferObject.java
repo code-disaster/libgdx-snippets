@@ -18,7 +18,7 @@ abstract class GLBufferObject<T extends Buffer> implements Disposable {
 	private final int handle;
 	private final int target;
 	private final int usage;
-	private final int elementSize;
+	protected final int elementSize;
 	private final ByteBuffer byteBuffer;
 
 	protected T buffer;

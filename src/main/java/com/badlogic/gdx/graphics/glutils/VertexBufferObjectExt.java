@@ -20,9 +20,10 @@ public class VertexBufferObjectExt extends GLBufferObject<FloatBuffer> {
 	}
 
 	public void setVertices(float[] vertices, int offset, int count) {
-		BufferUtils.copy(vertices, buffer, count, offset);
 		buffer.position(0);
-		buffer.limit(count);
+		BufferUtils.copy(vertices, buffer, count, offset);
+		buffer.position(buffer.limit());
+		buffer.limit(buffer.capacity());
 	}
 
 	public void addVertices(float[] vertices, int count) {
@@ -37,6 +38,12 @@ public class VertexBufferObjectExt extends GLBufferObject<FloatBuffer> {
 	protected void createElementBuffer(ByteBuffer byteBuffer) {
 		buffer = byteBuffer.asFloatBuffer();
 		wordSize = 4;
+	}
+
+	public static boolean fitsElements(VertexBufferObjectExt bufferObject, int numElements, int elementSize) {
+		return (bufferObject != null)
+				&& (numElements <= bufferObject.getMaxElements())
+				&& (elementSize == bufferObject.elementSize);
 	}
 
 }

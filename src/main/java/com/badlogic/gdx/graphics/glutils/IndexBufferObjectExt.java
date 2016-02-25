@@ -20,9 +20,10 @@ public class IndexBufferObjectExt extends GLBufferObject<ShortBuffer> {
 	}
 
 	public void setIndices(short[] indices, int offset, int count) {
-		BufferUtils.copy(indices, offset, buffer, count);
 		buffer.position(0);
-		buffer.limit(count);
+		BufferUtils.copy(indices, offset, buffer, count);
+		buffer.position(buffer.limit());
+		buffer.limit(buffer.capacity());
 	}
 
 	public void addIndices(short[] indices, int count) {
@@ -41,5 +42,9 @@ public class IndexBufferObjectExt extends GLBufferObject<ShortBuffer> {
 	protected void createElementBuffer(ByteBuffer byteBuffer) {
 		buffer = byteBuffer.asShortBuffer();
 		wordSize = 2;
+	}
+
+	public static boolean fitsElements(IndexBufferObjectExt bufferObject, int numElements) {
+		return (bufferObject != null) && (numElements <= bufferObject.getMaxElements());
 	}
 }

@@ -24,6 +24,7 @@ public class MultiTargetFrameBuffer extends GLFrameBuffer<Texture> {
 		R32F(GL_R32F, GL_RED, GL_FLOAT),
 		RG32F(GL_RG32F, GL_RG, GL_FLOAT),
 		RGB32F(GL_RGB32F, GL_RGB, GL_FLOAT),
+		RGBA32F(GL_RGBA32F, GL_RGBA, GL_FLOAT),
 
 		R8(GL_R8, GL_RED, GL_UNSIGNED_BYTE),
 
@@ -241,12 +242,16 @@ public class MultiTargetFrameBuffer extends GLFrameBuffer<Texture> {
 	}
 
 	public void clearColorBuffer(Color color, int index) {
+		clearColorBuffer(color.r, color.g, color.b, color.a, index);
+	}
+
+	public void clearColorBuffer(float r, float g, float b, float a, int index) {
 		synchronized (tmpColors) {
 			tmpColors.clear();
-			tmpColors.put(color.r);
-			tmpColors.put(color.g);
-			tmpColors.put(color.b);
-			tmpColors.put(color.a);
+			tmpColors.put(r);
+			tmpColors.put(g);
+			tmpColors.put(b);
+			tmpColors.put(a);
 			tmpColors.flip();
 
 			gl30.glClearBufferfv(GL_COLOR, index, tmpColors);
@@ -254,12 +259,16 @@ public class MultiTargetFrameBuffer extends GLFrameBuffer<Texture> {
 	}
 
 	public void clearColorBuffers(Color color) {
+		clearColorBuffers(color.r, color.g, color.b, color.a);
+	}
+
+	public void clearColorBuffers(float r, float g, float b, float a) {
 		synchronized (tmpColors) {
 			tmpColors.clear();
-			tmpColors.put(color.r);
-			tmpColors.put(color.g);
-			tmpColors.put(color.b);
-			tmpColors.put(color.a);
+			tmpColors.put(r);
+			tmpColors.put(g);
+			tmpColors.put(b);
+			tmpColors.put(a);
 			tmpColors.flip();
 
 			for (int index = 0; index < colorTextures.length; index++) {
@@ -269,12 +278,16 @@ public class MultiTargetFrameBuffer extends GLFrameBuffer<Texture> {
 	}
 
 	public void clearColorBuffers(Color color, int[] indices) {
+		clearColorBuffers(color.r, color.g, color.b, color.a, indices);
+	}
+
+	public void clearColorBuffers(float r, float g, float b, float a, int[] indices) {
 		synchronized (tmpColors) {
 			tmpColors.clear();
-			tmpColors.put(color.r);
-			tmpColors.put(color.g);
-			tmpColors.put(color.b);
-			tmpColors.put(color.a);
+			tmpColors.put(r);
+			tmpColors.put(g);
+			tmpColors.put(b);
+			tmpColors.put(a);
 			tmpColors.flip();
 
 			for (int index : indices) {
