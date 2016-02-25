@@ -87,7 +87,7 @@ public class AnnotatedJsonSerializer<T> implements Json.Serializer<T> {
 				typeName = object.getClass().getName();
 			}
 
-			json.writeValue("type", typeName, String.class);
+			json.writeValue("class", typeName, String.class);
 		}
 
 		fieldAdapters.forEach(adapter -> {
@@ -185,10 +185,11 @@ public class AnnotatedJsonSerializer<T> implements Json.Serializer<T> {
 
 			T object;
 			Class<T> clazz = this.clazz;
+			Array<FieldAdapter> fieldAdapters = this.fieldAdapters;
 
 			if (annotation.dynamic()) {
 
-				String typeName = json.readValue("type", String.class, jsonData);
+				String typeName = json.readValue("class", String.class, jsonData);
 
 				Class<?> typeClazz = null;
 
@@ -200,18 +201,24 @@ public class AnnotatedJsonSerializer<T> implements Json.Serializer<T> {
 					typeClazz = Class.forName(typeName);
 				}
 
-				if (typeClazz == null) {
-					throw new ClassNotFoundException("Class " + typeName + " not found");
-				}
-
 				if (!clazz.isAssignableFrom(typeClazz)) {
 					throw new ReflectionException(clazz.getName() + " is not assignable from " + typeName);
 				}
 
 				clazz = (Class<T>) typeClazz;
+
+				// need to "re-route" to serializer of sub-class
+
+				Json.Serializer<T> serializer = json.getSerializer(clazz);
+
+				if (serializer == null || !(serializer instanceof AnnotatedJsonSerializer)) {
+					throw new RuntimeException("No annotated serializer found for subclass " + clazz.getName());
+				}
+
+				fieldAdapters = ((AnnotatedJsonSerializer) serializer).fieldAdapters;
 			}
 
-			object = ClassReflection.newInstance(clazz);
+			object = createObjectInstance (clazz);
 
 			fieldAdapters.forEach(adapter -> {
 
@@ -235,6 +242,25 @@ public class AnnotatedJsonSerializer<T> implements Json.Serializer<T> {
 		} catch (ReflectionException | ClassNotFoundException e) {
 			throw new GdxRuntimeException(e);
 		}
+	}
+
+	@SuppressWarnings("unchecked")
+	private T createObjectInstance(Class<T> clazz) throws ReflectionException {
+
+		Constructor constructor = ClassReflection.getDeclaredConstructor(clazz);
+		boolean isConstructorPublic = constructor.isAccessible();
+
+		if (!isConstructorPublic) {
+			constructor.setAccessible(true);
+		}
+
+		T instance = (T) constructor.newInstance();
+
+		if (!isConstructorPublic) {
+			constructor.setAccessible(false);
+		}
+
+		return instance;
 	}
 
 	private void readObject(Json json, JsonValue jsonData, T object, FieldAdapter adapter) {

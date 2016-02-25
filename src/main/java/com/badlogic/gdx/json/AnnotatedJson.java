@@ -76,7 +76,7 @@ public class AnnotatedJson {
 				.filterURLforClass(clazz)
 				.process(clazzNameFilter::test, aClazz -> {
 					if (!clazz.equals(aClazz) && clazz.isAssignableFrom(aClazz)) {
-						System.out.println("register: " + aClazz.getName());
+						//System.out.println("register: " + aClazz.getName());
 						register(json, aClazz.asSubclass(clazz));
 					}
 				});
