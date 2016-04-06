@@ -26,7 +26,12 @@ public class MultiTargetFrameBuffer extends GLFrameBuffer<Texture> {
 		RGB32F(GL_RGB32F, GL_RGB, GL_FLOAT),
 		RGBA32F(GL_RGBA32F, GL_RGBA, GL_FLOAT),
 
+		RG16F(GL_RG16F, GL_RG, GL_FLOAT),
+
 		R8(GL_R8, GL_RED, GL_UNSIGNED_BYTE),
+		RG8(GL_RG8, GL_RG, GL_UNSIGNED_BYTE),
+
+		R32I(GL_R32I, GL_RED_INTEGER, GL_INT),
 
 		PixmapFormat(GL_NONE, GL_NONE, GL_NONE);
 
@@ -39,12 +44,39 @@ public class MultiTargetFrameBuffer extends GLFrameBuffer<Texture> {
 		}
 	}
 
+	public static class ColorAttachmentFormat {
+
+		Format format = Format.PixmapFormat;
+		Pixmap.Format pixmapFormat = Pixmap.Format.RGB888;
+		boolean generateMipmaps = false;
+		Texture.TextureFilter minFilter = Texture.TextureFilter.Nearest;
+		Texture.TextureFilter magFilter = Texture.TextureFilter.Nearest;
+
+		public ColorAttachmentFormat(Format format,
+									 Pixmap.Format pixmapFormat) {
+			this.format = format;
+			this.pixmapFormat = pixmapFormat;
+		}
+
+		public ColorAttachmentFormat(Format format,
+									 Pixmap.Format pixmapFormat,
+									 boolean generateMipmaps,
+									 Texture.TextureFilter minFilter,
+									 Texture.TextureFilter magFilter) {
+			this.format = format;
+			this.pixmapFormat = pixmapFormat;
+			this.generateMipmaps = generateMipmaps;
+			this.minFilter = minFilter;
+			this.magFilter = magFilter;
+		}
+	}
+
 	private Texture[] colorTextures;
 
 	private int depthBufferHandle;
 	private int depthStencilBufferHandle;
 
-	private static Format[] fbCreateFormats;
+	private static ColorAttachmentFormat[] fbCreateFormats;
 
 	private static IntBuffer attachmentIds;
 	private static final FloatBuffer tmpColors = BufferUtils.newFloatBuffer(4);
@@ -74,15 +106,13 @@ public class MultiTargetFrameBuffer extends GLFrameBuffer<Texture> {
 	public static MultiTargetFrameBuffer create(Format format, Pixmap.Format pixmapFormat, int numColorBuffers,
 												int width, int height, boolean hasDepth, boolean hasStencil) {
 
-		fbCreateFormats = new Format[numColorBuffers];
-		Pixmap.Format[] formats = new Pixmap.Format[numColorBuffers];
+		fbCreateFormats = new ColorAttachmentFormat[numColorBuffers];
 
 		for (int i = 0; i < numColorBuffers; i++) {
-			fbCreateFormats[i] = format;
-			formats[i] = format == Format.PixmapFormat ? pixmapFormat : null;
+			fbCreateFormats[i] = new ColorAttachmentFormat(format, pixmapFormat);
 		}
 
-		return new MultiTargetFrameBuffer(formats, width, height, hasDepth, hasStencil);
+		return new MultiTargetFrameBuffer(width, height, hasDepth, hasStencil);
 	}
 
 	/**
@@ -91,18 +121,18 @@ public class MultiTargetFrameBuffer extends GLFrameBuffer<Texture> {
 	 * This function equals {@link MultiTargetFrameBuffer#create(Format, Pixmap.Format, int, int, int, boolean, boolean)}
 	 * but individually describes the format for each color buffer.
 	 */
-	public static MultiTargetFrameBuffer create(Format[] formats, Pixmap.Format[] pixmapFormats,
-												int width, int height, boolean hasDepth, boolean hasStencil) {
+	public static MultiTargetFrameBuffer create(ColorAttachmentFormat[] formats,
+												int width, int height,
+												boolean hasDepth, boolean hasStencil) {
 
 		fbCreateFormats = formats;
-		return new MultiTargetFrameBuffer(pixmapFormats, width, height, hasDepth, hasStencil);
+		return new MultiTargetFrameBuffer(width, height, hasDepth, hasStencil);
 	}
 
-	private MultiTargetFrameBuffer(Pixmap.Format[] pixmapFormats,
-								   int width, int height, boolean hasDepth, boolean hasStencil) {
+	private MultiTargetFrameBuffer(int width, int height, boolean hasDepth, boolean hasStencil) {
 
-		super(pixmapFormats[0], width, height, false, false);
-		build(pixmapFormats, hasDepth, hasStencil);
+		super(Pixmap.Format.RGB888, width, height, false, false);
+		build(hasDepth, hasStencil);
 	}
 
 	/**
@@ -110,31 +140,33 @@ public class MultiTargetFrameBuffer extends GLFrameBuffer<Texture> {
 	 * This is done after the initial creation in {@link GLFrameBuffer#build()}, so glCheckFramebufferStatus() is
 	 * called again.
 	 */
-	private void build(Pixmap.Format[] formats, boolean hasDepth, boolean hasStencil) {
+	private void build(boolean hasDepth, boolean hasStencil) {
 
 		bind();
 
 		// create and attach additional color buffers
 
-		colorTextures = new Texture[formats.length];
+		int numColorAttachments = fbCreateFormats.length;
+
+		colorTextures = new Texture[numColorAttachments];
 		colorTextures[0] = colorTexture;
 
-		for (int i = 1; i < formats.length; i++) {
-			colorTextures[i] = createColorTexture(i, formats);
+		for (int i = 1; i < numColorAttachments; i++) {
+			colorTextures[i] = createColorTexture(i);
 			gl30.glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, GL_TEXTURE_2D,
 					colorTextures[i].getTextureObjectHandle(), 0);
 		}
 
 		synchronized (MultiTargetFrameBuffer.class) {
 
-			if (attachmentIds == null || formats.length > attachmentIds.capacity()) {
-				attachmentIds = BufferUtils.newIntBuffer(formats.length);
-				for (int i = 0; i < formats.length; i++) {
+			if (attachmentIds == null || numColorAttachments > attachmentIds.capacity()) {
+				attachmentIds = BufferUtils.newIntBuffer(numColorAttachments);
+				for (int i = 0; i < numColorAttachments; i++) {
 					attachmentIds.put(i, GL_COLOR_ATTACHMENT0 + i);
 				}
 			}
 
-			gl30.glDrawBuffers(formats.length, attachmentIds);
+			gl30.glDrawBuffers(numColorAttachments, attachmentIds);
 		}
 
 		// depth texture, or depth/stencil render target
@@ -179,23 +211,25 @@ public class MultiTargetFrameBuffer extends GLFrameBuffer<Texture> {
 
 	@Override
 	protected Texture createColorTexture() {
-		return createColorTexture(0, new Pixmap.Format[] { format });
+		return createColorTexture(0);
 	}
 
-	private Texture createColorTexture(int index, Pixmap.Format[] formats) {
+	private Texture createColorTexture(int index) {
 		Texture result;
 
-		if (fbCreateFormats[index] == Format.PixmapFormat) {
-			int glFormat = Pixmap.Format.toGlFormat(formats[index]);
-			int glType = Pixmap.Format.toGlType(formats[index]);
+		ColorAttachmentFormat format = fbCreateFormats[index];
+
+		if (format.format == Format.PixmapFormat) {
+			int glFormat = Pixmap.Format.toGlFormat(format.pixmapFormat);
+			int glType = Pixmap.Format.toGlType(format.pixmapFormat);
 			GLOnlyTextureData data = new GLOnlyTextureData(width, height, 0, glFormat, glFormat, glType);
 			result = new Texture(data);
 		} else {
-			ColorBufferTextureData data = new ColorBufferTextureData(fbCreateFormats[index], width, height);
+			ColorBufferTextureData data = new ColorBufferTextureData(format.format, format.generateMipmaps, width, height);
 			result = new Texture(data);
 		}
 
-		result.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+		result.setFilter(format.minFilter, format.magFilter);
 		result.setWrap(Texture.TextureWrap.ClampToEdge, Texture.TextureWrap.ClampToEdge);
 
 		return result;
@@ -238,6 +272,13 @@ public class MultiTargetFrameBuffer extends GLFrameBuffer<Texture> {
 			gl30.glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, tmpColors);
 		}
 
+		gl30.glBindTexture(GL_TEXTURE_2D, 0);
+	}
+
+	public void generateMipmap(int index) {
+		int handle = colorTextures[index].getTextureObjectHandle();
+		gl30.glBindTexture(GL_TEXTURE_2D, handle);
+		gl30.glGenerateMipmap(GL_TEXTURE_2D);
 		gl30.glBindTexture(GL_TEXTURE_2D, 0);
 	}
 
@@ -315,9 +356,13 @@ public class MultiTargetFrameBuffer extends GLFrameBuffer<Texture> {
 		private final Format format;
 		private final int width;
 		private final int height;
+		private final boolean generateMipmap;
 
-		ColorBufferTextureData(Format format, int width, int height) {
+		private boolean isPrepared = false;
+
+		ColorBufferTextureData(Format format, boolean generateMipmap, int width, int height) {
 			this.format = format;
+			this.generateMipmap = generateMipmap;
 			this.width = width;
 			this.height = height;
 		}
@@ -329,11 +374,12 @@ public class MultiTargetFrameBuffer extends GLFrameBuffer<Texture> {
 
 		@Override
 		public boolean isPrepared() {
-			return true;
+			return isPrepared;
 		}
 
 		@Override
 		public void prepare() {
+			isPrepared = true;
 		}
 
 		@Override
@@ -349,6 +395,9 @@ public class MultiTargetFrameBuffer extends GLFrameBuffer<Texture> {
 		@Override
 		public void consumeCustomData(int target) {
 			gl30.glTexImage2D(target, 0, format.internal, width, height, 0, format.format, format.type, null);
+			if (generateMipmap) {
+				gl30.glGenerateMipmap(target);
+			}
 		}
 
 		@Override
@@ -368,7 +417,7 @@ public class MultiTargetFrameBuffer extends GLFrameBuffer<Texture> {
 
 		@Override
 		public boolean useMipMaps() {
-			return false;
+			return generateMipmap;
 		}
 
 		@Override
