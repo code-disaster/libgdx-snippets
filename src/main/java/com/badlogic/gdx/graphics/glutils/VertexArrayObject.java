@@ -1,7 +1,5 @@
 package com.badlogic.gdx.graphics.glutils;
 
-import com.badlogic.gdx.graphics.VertexAttribute;
-import com.badlogic.gdx.graphics.VertexAttributes;
 import com.badlogic.gdx.utils.Disposable;
 
 import static com.badlogic.gdx.Gdx.gl30;
@@ -13,7 +11,7 @@ public class VertexArrayObject implements Disposable {
 
 	private final int[] vao = new int[1];
 
-	private VertexAttributes attributes;
+	private VertexAttributeArray attributes;
 	private int maxLocation = -1;
 
 	public VertexArrayObject() {
@@ -29,7 +27,7 @@ public class VertexArrayObject implements Disposable {
 		gl30.glBindVertexArray(vao[0]);
 	}
 
-	public void bindVertexLayout(VertexAttributes attributes) {
+	public void bindVertexLayout(VertexAttributeArray attributes) {
 
 		int[] locations = new int[attributes.size()];
 		for (int l = 0; l < attributes.size(); l++) {
@@ -39,33 +37,27 @@ public class VertexArrayObject implements Disposable {
 		bindVertexLayout(locations, attributes);
 	}
 
-	public void bindVertexLayout(int[] locations, VertexAttributes attributes) {
+	public void bindVertexLayout(int[] locations, VertexAttributeArray attributes) {
 
 		unbindLocations();
+
+		this.attributes = attributes;
 
 		int count = Math.min(locations.length, attributes.size());
 
 		for (int i = 0; i < count; i++) {
-
-			final VertexAttribute attribute = attributes.get(i);
-			final int location = locations[i];
-
-			bindLocation(location, attribute, attributes.vertexSize);
+			bindLocation(locations[i], i);
 		}
-
-		this.attributes = attributes;
 	}
 
-	private void bindLocation(int location, VertexAttribute attribute, int vertexSize) {
+	private void bindLocation(int location, int attribute) {
 
 		if (location < 0) {
 			return;
 		}
 
 		gl30.glEnableVertexAttribArray(location);
-
-		gl30.glVertexAttribPointer(location, attribute.numComponents, attribute.type,
-				attribute.normalized, vertexSize, attribute.offset);
+		attributes.bind(location, attribute);
 
 		maxLocation = Math.max(location, maxLocation);
 	}
@@ -83,7 +75,7 @@ public class VertexArrayObject implements Disposable {
 		gl30.glBindVertexArray(0);
 	}
 
-	public VertexAttributes getAttributes() {
+	public VertexAttributeArray getAttributes() {
 		return attributes;
 	}
 
