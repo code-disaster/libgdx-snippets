@@ -167,11 +167,29 @@ public class AnnotatedJsonSerializer<T> implements Json.Serializer<T> {
 			JsonMapSerializer<?, ?> serializer = (JsonMapSerializer<?, ?>) accessible.serializer;
 
 			if (Map.class.isAssignableFrom(clazz)) {
+
 				Map<?, ?> value = accessible.get(object);
-				serializer.write(json, value.entrySet(), Map.Entry::getKey, Map.Entry::getValue);
+
+				if (value != null) {
+					serializer.write(json, value.entrySet(), Map.Entry::getKey, Map.Entry::getValue);
+				} else {
+					if (annotation.writeNull()) {
+						json.writeValue(accessible.getName(), Map.class.cast(null), Map.class);
+					}
+				}
+
 			} else if (ObjectMap.class.isAssignableFrom(clazz)) {
+
 				ObjectMap<?, ?> value = accessible.get(object);
-				serializer.write(json, value.entries(), e -> e.key, e -> e.value);
+
+				if (value != null) {
+					serializer.write(json, value.entries(), e -> e.key, e -> e.value);
+				} else {
+					if (annotation.writeNull()) {
+						json.writeValue(accessible.getName(), ObjectMap.class.cast(null), ObjectMap.class);
+					}
+				}
+
 			}
 
 		});
