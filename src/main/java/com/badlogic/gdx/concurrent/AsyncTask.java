@@ -1,12 +1,9 @@
 package com.badlogic.gdx.concurrent;
 
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.FutureTask;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 /**
  * A reentrant wrapper to {@link FutureTask}, with some additional properties to synchronize its result with the
@@ -14,87 +11,95 @@ import java.util.function.Consumer;
  * <p>
  * The task is (re-)scheduled for asynchronous execution with {@link AsyncTask#execute(ExecutorService)}.
  * <p>
- * Upon completion, result of the asynchronous computation is cached. It can then be read or polled by the calling
- * thread via {@link AsyncTask#get()} or {@link AsyncTask#poll(Consumer)}.
+ * Upon completion, a {@link CyclicBarrier} is entered, waiting for the scheduling thread to call
+ * {@link AsyncTask#await(Consumer)}. After both threads have entered the barrier, {@link AsyncTaskJob#completed()}
+ * is called.
  */
-public abstract class AsyncTask<R extends Callable<R>> {
+public class AsyncTask<V extends AsyncTaskJob<V>> {
 
 	private enum State {
 		READY,
 		PENDING,
-		DONE
+		COMPLETED
 	}
 
-	protected final R callable;
+	protected final V job;
 
-	private final AtomicReference<R> result = new AtomicReference<>();
+	private final CyclicBarrier completionBarrier;
+
 	private final AtomicReference<State> state = new AtomicReference<>(State.READY);
-	private final AtomicBoolean resultAvailable = new AtomicBoolean(false);
 
-	public AsyncTask(R callable) {
-		this.callable = callable;
-		result.set(callable);
+	public AsyncTask(V job) {
+		this.job = job;
+		completionBarrier = new CyclicBarrier(2, this::completed);
+	}
+
+	public boolean consumeJobPredicate(Predicate<V> consumer) {
+
+		if (state.get() != State.READY) {
+			//throw new IllegalStateException("Invalid task state!");
+			return false;
+		}
+
+		return consumer.test(job);
+	}
+
+	@Deprecated
+	public boolean consumeJob(Consumer<V> consumer) {
+
+		if (state.get() != State.READY) {
+			//throw new IllegalStateException("Invalid task state!");
+			return false;
+		}
+
+		consumer.accept(job);
+
+		return true;
+	}
+
+	public boolean isReady() {
+		return state.get() == State.READY;
 	}
 
 	public boolean isPending() {
 		return state.get() == State.PENDING;
 	}
 
-	public boolean isDone() {
-		return state.get() == State.DONE;
+	public boolean isCompleted() {
+		return state.get() == State.COMPLETED;
 	}
 
 	/**
-	 * This function blocks until the asynchronous task has been completed, if one is pending.
-	 */
-	public void await() {
-		while (isPending()) {
-			Thread.yield();
-		}
-	}
-
-	/**
-	 * Non-blocking retrieval of the task result. If the result is available, the provided completion handler is called.
-	 * This is only done once, so subsequent calls to this function won't trigger the handler again.
-	 * <p>
-	 * This is a convenience function similar to:
-	 * <pre>
-	 * if (isDone() && [result_not_retrieved_before]) {
-	 *     R result = get();
-	 *     completionHandler.run(result);
-	 * }
-	 * </pre>
+	 * Enters the task's completion barrier, waiting for {@link AsyncTaskJob#completed()} to be called.
 	 *
-	 * @return true if result of the task has been retrieved.
+	 * This function blocks execution if the task is still pending. Use {@link AsyncTask#isCompleted()}
+	 * for a non-blocking check.
+	 *
+	 * Returns the arrival index of the current thread, see {@link CyclicBarrier#await()}.
 	 */
-	public boolean poll(Consumer<R> completionHandler) {
-		if (state.get() == State.DONE) {
-			if (resultAvailable.compareAndSet(true, false)) {
-				R r = get();
-				if (r != null) {
-					completionHandler.accept(r);
-					return true;
-				}
+	public int await(Consumer<V> consumeAfterCompletion) throws InterruptedException {
+
+		if (state.get() == State.READY) {
+			throw new IllegalStateException("Invalid task state!");
+		}
+
+		try {
+
+			int arrivalIndex = completionBarrier.await();
+
+			if (consumeAfterCompletion != null) {
+				consumeAfterCompletion.accept(job);
 			}
-		}
-		return false;
-	}
 
-	/**
-	 * Non-blocking retrieval of the task result. Throws an exception if the result is not available yet, or has been
-	 * retrieved already.
-	 * <p>
-	 * To prevent this from happening, callers should use {@link AsyncTask#isDone()} before calling this function.
-	 *
-	 * @throws IllegalStateException if no valid result is available.
-	 */
-	public R get() {
-		if (state.get() != State.DONE) {
-			throw new IllegalStateException("Illegal state!");
+			if (!state.compareAndSet(State.COMPLETED, State.READY)) {
+				throw new IllegalStateException("Invalid task state!");
+			}
+
+			return arrivalIndex;
+
+		} catch (BrokenBarrierException e) {
+			throw new InterruptedException(e.getMessage());
 		}
-		state.compareAndSet(State.DONE, State.READY);
-		resultAvailable.compareAndSet(true, false);
-		return result.get();
 	}
 
 	/**
@@ -104,34 +109,28 @@ public abstract class AsyncTask<R extends Callable<R>> {
 	 */
 	void execute(ExecutorService service) {
 
-		if (state.get() == State.PENDING) {
-			throw new IllegalStateException("Task still pending!");
-		}
-
-		if (state.get() == State.DONE) {
-			throw new IllegalStateException("Task result not requested!");
-		}
-
 		// reset state
-		result.set(null);
-		state.compareAndSet(State.READY, State.PENDING);
-		resultAvailable.set(false);
+		if (!state.compareAndSet(State.READY, State.PENDING)) {
+			throw new IllegalStateException("Invalid task state!");
+		}
+
+		completionBarrier.reset();
 
 		// pass to executor service
-		service.execute(new Task(callable));
+		service.execute(new Task());
 	}
 
 	/**
-	 * Called by {@link FutureTask#done()} in scope of executor thread.
+	 * Called from {@link CyclicBarrier} when the async task is completed.
 	 */
-	public void done() {
-
+	private void completed() {
+		job.completed();
 	}
 
-	private class Task extends FutureTask<R> {
+	private class Task extends FutureTask<V> {
 
-		Task(R callable) {
-			super(callable);
+		Task() {
+			super(job);
 		}
 
 		@Override
@@ -139,18 +138,13 @@ public abstract class AsyncTask<R extends Callable<R>> {
 
 			try {
 
-				if (!state.compareAndSet(State.PENDING, State.DONE)
-						|| !resultAvailable.compareAndSet(false, true)) {
+				if (!state.compareAndSet(State.PENDING, State.COMPLETED)) {
 					throw new IllegalStateException("Invalid completion state!");
 				}
 
-				if (!result.compareAndSet(null, get())) {
-					throw new RuntimeException("Invalid result state!");
-				}
+				completionBarrier.await();
 
-				AsyncTask.this.done();
-
-			} catch (InterruptedException | ExecutionException e) {
+			} catch (InterruptedException | BrokenBarrierException e) {
 				throw new IllegalStateException(e);
 			}
 

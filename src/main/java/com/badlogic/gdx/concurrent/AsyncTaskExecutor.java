@@ -26,8 +26,8 @@ public class AsyncTaskExecutor implements Disposable {
 		}
 	}
 
-	public <R extends Callable<R>>
-	void execute(AsyncTask<R> task) {
+	public <V extends AsyncTaskJob<V>>
+	void execute(AsyncTask<V> task) {
 		task.execute(service);
 	}
 
