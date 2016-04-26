@@ -479,20 +479,21 @@ public class AnnotatedJsonSerializer<T> implements Json.Serializer<T> {
 
 		if (isArray(adapter)) {
 
-			JsonArray[] arrays = adapter.annotation.array();
+			JsonArray array = adapter.annotation.array()[0];
 
-			if (arrays.length != 1) {
-				throw new GdxRuntimeException(
-						"@JsonSerialize annotation on Array<> requires array() property.");
+			if (!Array.class.isAssignableFrom(array.array())) {
+				throw new GdxRuntimeException("Container type must derive from Array<?>!");
 			}
-
-			JsonArray array = arrays[0];
 
 			return new JsonArraySerializer<>(adapter.getName(), array);
 
 		} else if (isMap(adapter)) {
 
 			JsonMap map = adapter.annotation.map()[0];
+
+			if (!Map.class.isAssignableFrom(map.map()) && !ObjectMap.class.isAssignableFrom(map.map())) {
+				throw new GdxRuntimeException("Container type must derive from Map<?, ?> or ObjectMap<?, ?>!");
+			}
 
 			return new JsonMapSerializer<>(adapter.getName(), map);
 		}
@@ -501,7 +502,7 @@ public class AnnotatedJsonSerializer<T> implements Json.Serializer<T> {
 	}
 
 	private boolean isArray(FieldAdapter adapter) {
-		return adapter.field.getType().equals(Array.class);
+		return adapter.annotation.array().length > 0;
 	}
 
 	private boolean isMap(FieldAdapter adapter) {

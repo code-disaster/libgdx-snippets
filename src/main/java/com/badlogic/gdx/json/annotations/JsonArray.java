@@ -1,10 +1,17 @@
 package com.badlogic.gdx.json.annotations;
 
+import com.badlogic.gdx.utils.Array;
+
 import java.lang.annotation.*;
 
 @Target(ElementType.FIELD)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface JsonArray {
+
+	/**
+	 * Used to construct the correct container class which must be derived from {@link Array}.
+	 */
+	Class<?> array() default Array.class;
 
 	/**
 	 * Specifies class type of array elements.

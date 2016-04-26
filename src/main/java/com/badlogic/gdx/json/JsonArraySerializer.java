@@ -25,9 +25,7 @@ class JsonArraySerializer<V> implements Json.Serializer<Array<?>> {
 
 		json.writeArrayStart(name);
 
-		object.forEach(item -> {
-			json.writeValue(item, array.value());
-		});
+		object.forEach(item -> json.writeValue(item, array.value()));
 
 		json.writeArrayEnd();
 	}
@@ -49,7 +47,16 @@ class JsonArraySerializer<V> implements Json.Serializer<Array<?>> {
 
 		// create array, read data
 
-		Array<V> values = new Array<>(array.ordered(), size);
+		Array<V> values;
+
+		try {
+			values = (Array<V>) array.array().newInstance();
+		} catch (InstantiationException | IllegalAccessException e) {
+			throw new GdxRuntimeException(e);
+		}
+
+		values.ensureCapacity(size);
+		values.ordered = array.ordered();
 
 		while (entry != null) {
 
