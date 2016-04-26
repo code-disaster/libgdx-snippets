@@ -1,9 +1,10 @@
 package com.badlogic.gdx.utils;
 
+import com.badlogic.gdx.function.BooleanFunction;
+
 import javax.annotation.Nonnull;
 import java.util.*;
 import java.util.function.Consumer;
-import java.util.function.Function;
 
 /**
  * Array utility functions.
@@ -23,25 +24,31 @@ public class ArrayUtils {
 	}
 
 	/**
-	 * Convenience function to iterate an array. Stops if user-supplied function returns False.
+	 * Convenience function to iterate an array. Stops if user-supplied function returns false.
+	 * <p>
+	 * @return true if end of array was reached
 	 */
-	public static <T> void forEachWhile(T[] array, Function<T, Boolean> action) {
+	public static <T> boolean forEachWhile(T[] array, BooleanFunction<T> action) {
 		for (T t : array) {
 			if (!action.apply(t)) {
-				break;
+				return false;
 			}
 		}
+		return true;
 	}
 
 	/**
-	 * Convenience function to iterate an array. Stops if user-supplied function returns False.
+	 * Convenience function to iterate an array. Stops if user-supplied function returns false.
+	 * <p>
+	 * @return true if end of array was reached
 	 */
-	public static <T> void forEachWhile(Array<T> array, Function<T, Boolean> action) {
+	public static <T> boolean forEachWhile(Array<T> array, BooleanFunction<T> action) {
 		for (T t : array) {
 			if (!action.apply(t)) {
-				break;
+				return false;
 			}
 		}
+		return true;
 	}
 
 	/**
@@ -49,7 +56,7 @@ public class ArrayUtils {
 	 * <p>
 	 * Returns null if no match is found.
 	 */
-	public static <T> T find(T[] array, Function<T, Boolean> match) {
+	public static <T> T find(T[] array, BooleanFunction<T> match) {
 		for (T t : array) {
 			if (match.apply(t)) {
 				return t;
@@ -63,7 +70,7 @@ public class ArrayUtils {
 	 * <p>
 	 * Returns null if no match is found.
 	 */
-	public static <T> T find(Array<T> array, Function<T, Boolean> match) {
+	public static <T> T find(Array<T> array, BooleanFunction<T> match) {
 		for (T t : array) {
 			if (match.apply(t)) {
 				return t;
@@ -77,7 +84,7 @@ public class ArrayUtils {
 	 * <p>
 	 * Returns -1 if no match is found.
 	 */
-	public static <T> int findIndex(T[] array, Function<T, Boolean> match) {
+	public static <T> int findIndex(T[] array, BooleanFunction<T> match) {
 		for (int i = 0; i < array.length; i++) {
 			if (match.apply(array[i])) {
 				return i;
@@ -91,7 +98,7 @@ public class ArrayUtils {
 	 * <p>
 	 * Returns -1 if no match is found.
 	 */
-	public static <T> int findIndex(Array<T> array, Function<T, Boolean> match) {
+	public static <T> int findIndex(Array<T> array, BooleanFunction<T> match) {
 		for (int i = 0; i < array.size; i++) {
 			if (match.apply(array.get(i))) {
 				return i;
@@ -103,7 +110,7 @@ public class ArrayUtils {
 	/**
 	 * Iterates the array, consuming items only which fulfill the user-defined comparison.
 	 */
-	public static <T> void findAll(T[] array, Function<T, Boolean> match, Consumer<T> action) {
+	public static <T> void findAll(T[] array, BooleanFunction<T> match, Consumer<T> action) {
 		for (T t : array) {
 			if (match.apply(t)) {
 				action.accept(t);
