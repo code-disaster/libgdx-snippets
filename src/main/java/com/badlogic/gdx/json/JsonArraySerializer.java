@@ -25,7 +25,9 @@ class JsonArraySerializer<V> implements Json.Serializer<Array<?>> {
 
 		json.writeArrayStart(name);
 
-		object.forEach(item -> json.writeValue(item, array.value()));
+		for (int i = 0; i < object.size; i++) {
+			json.writeValue(object.get(i), array.value());
+		}
 
 		json.writeArrayEnd();
 	}

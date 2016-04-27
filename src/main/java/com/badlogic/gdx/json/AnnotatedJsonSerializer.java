@@ -90,7 +90,9 @@ public class AnnotatedJsonSerializer<T> implements Json.Serializer<T> {
 			json.writeValue("class", typeName, String.class);
 		}
 
-		fieldAdapters.forEach(adapter -> {
+		for (int i = 0; i < fieldAdapters.size; i++) {
+
+			FieldAdapter adapter = fieldAdapters.get(i);
 
 			if (isKnownContainerType(adapter)) {
 
@@ -105,7 +107,7 @@ public class AnnotatedJsonSerializer<T> implements Json.Serializer<T> {
 				writeObject(json, object, adapter);
 
 			}
-		});
+		}
 
 		json.writeObjectEnd();
 	}
@@ -238,7 +240,9 @@ public class AnnotatedJsonSerializer<T> implements Json.Serializer<T> {
 
 			object = createObjectInstance (clazz);
 
-			fieldAdapters.forEach(adapter -> {
+			for (int i = 0; i < fieldAdapters.size; i++) {
+
+				FieldAdapter adapter = fieldAdapters.get(i);
 
 				if (isKnownContainerType(adapter)) {
 
@@ -253,7 +257,7 @@ public class AnnotatedJsonSerializer<T> implements Json.Serializer<T> {
 					readObject(json, jsonData, object, adapter);
 
 				}
-			});
+			}
 
 			return object;
 
