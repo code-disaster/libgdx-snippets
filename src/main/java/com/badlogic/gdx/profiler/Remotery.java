@@ -37,6 +37,11 @@ public class Remotery implements Profiler {
 		public int maxNbMessagesPerUpdate = 100;
 	}
 
+	public static class SampleFlags {
+		public static final int None = 0;
+		public static final int Aggregate = 1;
+	}
+
 	public static boolean createGlobalInstance(Settings settings) {
 
 		if (!initialized) {
@@ -85,7 +90,7 @@ public class Remotery implements Profiler {
 		}
 	}
 
-	public static void beginCPUSample(String name) {
+	public static void beginCPUSample(String name, boolean aggregate) {
 
 		Sample sample = cacheCPUSamples.getOrDefault(name, defaultSample);
 
@@ -94,7 +99,9 @@ public class Remotery implements Profiler {
 			cacheCPUSamples.put(name, sample);
 		}
 
-		int hash = rmtBeginCPUSample(sample.name, sample.hash);
+		int flags = aggregate ? SampleFlags.Aggregate : SampleFlags.None;
+
+		int hash = rmtBeginCPUSample(sample.name, flags, sample.hash);
 
 		if (sample.hash == 0) {
 			sample.hash = hash;
@@ -102,10 +109,10 @@ public class Remotery implements Profiler {
 	}
 
 	@Override
-	public void sampleCPU(String name, Runnable runnable) {
+	public void sampleCPU(String name, boolean aggregate, Runnable runnable) {
 
 		if (initialized) {
-			beginCPUSample(name);
+			beginCPUSample(name, aggregate);
 		}
 
 		runnable.run();
@@ -199,9 +206,9 @@ public class Remotery implements Profiler {
 		rmt_LogText(text);
 	*/
 
-	public static native int rmtBeginCPUSample(long name, int hash); /*
+	public static native int rmtBeginCPUSample(long name, int flags, int hash); /*
 		rmtU32 hash_cache = hash & 0xffffffff;
-		_rmt_BeginCPUSample((const char*) name, &hash_cache);
+		_rmt_BeginCPUSample((const char*) name, flags, &hash_cache);
 		return hash_cache;
 	*/
 

@@ -5,7 +5,7 @@ package com.badlogic.gdx.profiler;
  */
 public interface Profiler {
 
-	void sampleCPU(String name, Runnable runnable);
+	void sampleCPU(String name, boolean aggregate, Runnable runnable);
 
 	void sampleOpenGL(String name, Runnable runnable);
 
