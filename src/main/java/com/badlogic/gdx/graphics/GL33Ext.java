@@ -65,6 +65,10 @@ public final class GL33Ext {
 		}
 	*/
 
+	public static native void glColorMaski(int buffer, boolean r, boolean g, boolean b, boolean a); /*
+		glColorMaski(buffer, r, g, b, a);
+	*/
+
 	public static native void glDrawElementsBaseVertex(int mode, int count, int type, int indices, int baseVertex); /*
 		glDrawElementsBaseVertex(mode, count, type, (const void*) ((size_t) indices), baseVertex);
 	*/
