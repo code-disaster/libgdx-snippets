@@ -19,6 +19,33 @@ import java.util.function.Consumer;
  *
  * For boxed primitive types there is a small, thread-local storage which holds
  * one per-thread instance of each sub-class.
+ *
+ * <pre>
+ * {@code
+ * int getSum(Iterable<Integer> container) {
+ *     final Box.Integer sum = Box.borrowInteger();
+ *     sum.set(0);
+ *     container.forEach(element -> sum.set(sum.get() + element));
+ *     int result = sum.get();
+ *     Box.releaseInteger();
+ *     return result;
+ * }
+ * }
+ * </pre>
+ *
+ * There's also a version which uses try-with-resources internally.
+ *
+ * <pre>
+ * {@code
+ * int getSum(Iterable<Integer> container) {
+ * 	   return Box.withInteger(sum -> {
+ *         sum.set(0);
+ *         container.forEach(element -> sum.set(sum.get() + element));
+ * 	   });
+ * }
+ * }
+ * </pre>
+ *
  */
 public final class Box {
 
@@ -61,6 +88,10 @@ public final class Box {
 
 		public int get() {
 			return value;
+		}
+
+		public int getAndIncrement() {
+			return value++;
 		}
 
 		public Integer set(int value) {
@@ -127,7 +158,7 @@ public final class Box {
 		private final B[] references;
 		private int locks = 0;
 
-		private static final int cacheSize = 2;
+		private static final int cacheSize = 4;
 
 		@SuppressWarnings("unchecked")
 		private BorrowChecker(Class<B> clazz) {
@@ -185,6 +216,17 @@ public final class Box {
 			consumer.accept(value.reference());
 			return value.reference().get();
 		}
+	}
+
+	public static Integer borrowInteger() {
+		return tlsInteger.get().borrow().reference();
+	}
+
+	public static int releaseInteger() {
+		BorrowChecker<Integer> value = tlsInteger.get();
+		int result = value.reference().get();
+		value.close();
+		return result;
 	}
 
 	public static int withInteger(Consumer<Integer> consumer) {

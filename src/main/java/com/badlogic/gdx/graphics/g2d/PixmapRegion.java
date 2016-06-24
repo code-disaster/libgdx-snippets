@@ -102,4 +102,11 @@ public class PixmapRegion {
 
 		return false;
 	}
+
+	@Override
+	public int hashCode() {
+		assert false : "not implemented";
+		return -1;
+	}
+
 }

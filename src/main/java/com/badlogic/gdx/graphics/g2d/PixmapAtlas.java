@@ -93,6 +93,10 @@ public class PixmapAtlas implements Disposable {
 		return null;
 	}
 
+	public FileHandle getFolder() {
+		return pages.get(0).fileHandle.parent();
+	}
+
 	public static class AtlasRegion extends PixmapRegion {
 
 		public AtlasPage page;
