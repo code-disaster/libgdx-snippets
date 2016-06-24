@@ -9,6 +9,7 @@ import java.security.NoSuchAlgorithmException;
 public class SHA1FileTable {
 
 	public enum CheckFileResult {
+		Unchecked, // file has not been checked yet
 		Unmodified, // file not changed
 		Modified, // file content has been modified
 		NoSHA1SumFound, // file not yet known (may be new)
@@ -18,10 +19,12 @@ public class SHA1FileTable {
 	private static class Entry {
 		String filePath;
 		SHA1 sha1;
+		CheckFileResult checkResult;
 
 		Entry(String filePath, SHA1 sha1) {
 			this.filePath = filePath;
 			this.sha1 = sha1;
+			this.checkResult = CheckFileResult.Unchecked;
 		}
 	}
 
@@ -96,17 +99,25 @@ public class SHA1FileTable {
 
 			Entry entry = entries.get(file.getPath());
 
+			if (entry.checkResult != CheckFileResult.Unchecked) {
+				// no need to hash more than once
+				return entry.checkResult;
+			}
+
 			SHA1 sha1 = processFile(file);
 
-			if (!sha1.equals(entry.sha1)) {
-				return CheckFileResult.Modified;
+			if (sha1.equals(entry.sha1)) {
+				entry.checkResult = CheckFileResult.Unmodified;
+			} else {
+				entry.checkResult = CheckFileResult.Modified;
 			}
+
+			return entry.checkResult;
 
 		} catch (IOException e) {
 			return CheckFileResult.FileNotFound;
 		}
 
-		return CheckFileResult.Unmodified;
 	}
 
 	/**
@@ -128,10 +139,20 @@ public class SHA1FileTable {
 	/**
 	 * Removes a table entry.
 	 */
+	@Deprecated
 	public void unregisterFile(File file) {
 		if (isKnownFile(file)) {
 			entries.remove(file.getPath());
 		}
+	}
+
+	public boolean hasUncheckedFiles() {
+		for (Entry entry : entries.values()) {
+			if (entry.checkResult == CheckFileResult.Unchecked) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	private boolean isKnownFile(File file) {
