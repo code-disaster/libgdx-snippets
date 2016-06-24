@@ -2,6 +2,7 @@ package com.badlogic.gdx.json;
 
 import com.badlogic.gdx.json.annotations.JsonArray;
 import com.badlogic.gdx.utils.*;
+import com.badlogic.gdx.utils.reflect.ArrayReflection;
 
 /**
  * Implementation of {@link com.badlogic.gdx.utils.Json.Serializer} to serialize {@link Array} containers.
@@ -52,13 +53,16 @@ class JsonArraySerializer<V> implements Json.Serializer<Array<?>> {
 		Array<V> values;
 
 		try {
+
+			V[] items = (V[]) ArrayReflection.newInstance(array.value(), size);
+
 			values = (Array<V>) array.array().newInstance();
-		} catch (InstantiationException | IllegalAccessException e) {
+			values.items = items;
+			values.ordered = array.ordered();
+
+		} catch (ClassCastException | InstantiationException | IllegalAccessException e) {
 			throw new GdxRuntimeException(e);
 		}
-
-		values.ensureCapacity(size);
-		values.ordered = array.ordered();
 
 		while (entry != null) {
 
