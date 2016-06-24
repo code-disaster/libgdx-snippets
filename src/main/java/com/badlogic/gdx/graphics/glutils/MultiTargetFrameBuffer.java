@@ -51,6 +51,7 @@ public class MultiTargetFrameBuffer extends GLFrameBuffer<Texture> {
 		boolean generateMipmaps = false;
 		Texture.TextureFilter minFilter = Texture.TextureFilter.Nearest;
 		Texture.TextureFilter magFilter = Texture.TextureFilter.Nearest;
+		Texture.TextureWrap wrap = Texture.TextureWrap.ClampToEdge;
 
 		public ColorAttachmentFormat(Format format,
 									 Pixmap.Format pixmapFormat) {
@@ -68,6 +69,20 @@ public class MultiTargetFrameBuffer extends GLFrameBuffer<Texture> {
 			this.generateMipmaps = generateMipmaps;
 			this.minFilter = minFilter;
 			this.magFilter = magFilter;
+		}
+
+		public ColorAttachmentFormat(Format format,
+									 Pixmap.Format pixmapFormat,
+									 boolean generateMipmaps,
+									 Texture.TextureFilter minFilter,
+									 Texture.TextureFilter magFilter,
+									 Texture.TextureWrap wrap) {
+			this.format = format;
+			this.pixmapFormat = pixmapFormat;
+			this.generateMipmaps = generateMipmaps;
+			this.minFilter = minFilter;
+			this.magFilter = magFilter;
+			this.wrap = wrap;
 		}
 	}
 
@@ -230,7 +245,7 @@ public class MultiTargetFrameBuffer extends GLFrameBuffer<Texture> {
 		}
 
 		result.setFilter(format.minFilter, format.magFilter);
-		result.setWrap(Texture.TextureWrap.ClampToEdge, Texture.TextureWrap.ClampToEdge);
+		result.setWrap(format.wrap, format.wrap);
 
 		return result;
 	}
@@ -425,4 +440,28 @@ public class MultiTargetFrameBuffer extends GLFrameBuffer<Texture> {
 			return true;
 		}
 	}
+
+	public static void copyDepthStencilBuffer(MultiTargetFrameBuffer target,
+											  int destX0, int destY0, int destX1, int destY1,
+											  MultiTargetFrameBuffer source,
+											  int srcX0, int srcY0, int srcX1, int srcY1) {
+
+		int mask = GL_DEPTH_BUFFER_BIT;
+
+		if (source.hasStencil && target.hasStencil) {
+			mask |= GL_STENCIL_BUFFER_BIT;
+		}
+
+		int sourceFbo = source.getFramebufferHandle();
+		int targetFbo = target.getFramebufferHandle();
+
+		gl30.glBindFramebuffer(GL_READ_FRAMEBUFFER, sourceFbo);
+		gl30.glBindFramebuffer(GL_DRAW_FRAMEBUFFER, targetFbo);
+
+		gl30.glBlitFramebuffer(srcX0, srcY0, srcX1, srcY1, destX0, destY0, destX1, destY1, mask, GL_NEAREST);
+
+		gl30.glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
+		gl30.glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+	}
+
 }
