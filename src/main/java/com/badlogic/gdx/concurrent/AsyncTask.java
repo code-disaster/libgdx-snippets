@@ -29,6 +29,8 @@ public class AsyncTask<V extends AsyncTaskJob<V>> {
 
 	private final AtomicReference<State> state = new AtomicReference<>(State.READY);
 
+	private Task task;
+
 	public AsyncTask(V job) {
 		this.job = job;
 		completionBarrier = new CyclicBarrier(2, this::completed);
@@ -87,6 +89,8 @@ public class AsyncTask<V extends AsyncTaskJob<V>> {
 
 			int arrivalIndex = completionBarrier.await();
 
+			task.get(); // this causes an ExecutionException if there has been some error
+
 			if (consumeAfterCompletion != null) {
 				consumeAfterCompletion.accept(job);
 			}
@@ -99,6 +103,9 @@ public class AsyncTask<V extends AsyncTaskJob<V>> {
 
 		} catch (BrokenBarrierException e) {
 			throw new InterruptedException(e.getMessage());
+		} catch (ExecutionException e) {
+			e.printStackTrace(System.err);
+			throw new RuntimeException("Exception thrown during execution of asynchronous task!");
 		}
 	}
 
@@ -117,7 +124,7 @@ public class AsyncTask<V extends AsyncTaskJob<V>> {
 		completionBarrier.reset();
 
 		// pass to executor service
-		service.execute(new Task());
+		service.execute(task = new Task());
 	}
 
 	/**
