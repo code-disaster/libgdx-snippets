@@ -11,8 +11,8 @@ import java.util.function.Consumer;
  * Generic implementation of {@link com.badlogic.gdx.utils.Json.Serializer} which uses reflection information
  * to decide which fields to serialize.
  *
- * @see {@link com.badlogic.gdx.json.annotations.JsonSerializable}
- * @see {@link com.badlogic.gdx.json.annotations.JsonSerialize}
+ * @see com.badlogic.gdx.json.annotations.JsonSerializable
+ * @see com.badlogic.gdx.json.annotations.JsonSerialize
  */
 public class AnnotatedJsonSerializer<T> implements Json.Serializer<T> {
 
@@ -153,8 +153,15 @@ public class AnnotatedJsonSerializer<T> implements Json.Serializer<T> {
 		adapter.ensureAccess(accessible -> {
 
 			Array<?> array = accessible.get(object);
-			JsonArraySerializer<?> serializer = (JsonArraySerializer<?>) accessible.serializer;
-			serializer.write(json, array, Array.class);
+
+			if (array != null) {
+				JsonArraySerializer<?> serializer = (JsonArraySerializer<?>) accessible.serializer;
+				serializer.write(json, array, Array.class);
+			} else {
+				if (annotation.writeNull()) {
+					json.writeValue(accessible.getName(), Array.class.cast(null), Array.class);
+				}
+			}
 
 		});
 	}
