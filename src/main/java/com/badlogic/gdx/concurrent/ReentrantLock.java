@@ -2,6 +2,7 @@ package com.badlogic.gdx.concurrent;
 
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 /**
@@ -15,6 +16,15 @@ public class ReentrantLock {
 		try {
 			lock.lock();
 			runnable.run();
+		} finally {
+			lock.unlock();
+		}
+	}
+
+	public <C> void lock(C context, Consumer<C> consumer) {
+		try {
+			lock.lock();
+			consumer.accept(context);
 		} finally {
 			lock.unlock();
 		}

@@ -2,6 +2,7 @@ package com.badlogic.gdx.profiler;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Consumer;
 
 /**
  * JNI wrapper to Remotery (https://github.com/Celtoys/Remotery), a realtime CPU/OpenGL profiler with
@@ -13,22 +14,45 @@ public class Remotery implements Profiler {
 	private static boolean initializedOpenGL = false;
 
 	private static Map<String, Long> threadNames = new ConcurrentHashMap<>();
-	private static Map<String, Sample> cacheCPUSamples = new ConcurrentHashMap<>();
-	private static Map<String, Sample> cacheOpenGLSamples = new ConcurrentHashMap<>();
+	private static Map<String, CPUSample> cacheCPUSamples = new ConcurrentHashMap<>();
+	private static Map<String, OpenGLSample> cacheOpenGLSamples = new ConcurrentHashMap<>();
 
-	private static class Sample {
-		public long name;
-		public int hash;
+	private abstract static class Sample implements AutoCloseable {
+		long name;
+		int hash;
 
-		public Sample() {}
-
-		public Sample(String name, int hash) {
-			this.name = strdupNativeName(name);
+		Sample(String name, int hash) {
+			this.name = name != null ? strdupNativeName(name) : 0L;
 			this.hash = hash;
 		}
 	}
 
-	private static Sample defaultSample = new Sample();
+	public static class CPUSample extends Sample {
+
+		CPUSample(String name, int hash) {
+			super(name, hash);
+		}
+
+		@Override
+		public void close() throws Exception {
+			endCPUSample();
+		}
+	}
+
+	public static class OpenGLSample extends Sample {
+
+		OpenGLSample(String name, int hash) {
+			super(name, hash);
+		}
+
+		@Override
+		public void close() throws Exception {
+			endOpenGLSample();
+		}
+	}
+
+	private static CPUSample defaultCPUSample = new CPUSample(null, 0);
+	private static OpenGLSample defaultOpenGLSample = new OpenGLSample(null, 0);
 
 	public static class Settings {
 		public int port = 0x4597;
@@ -90,12 +114,12 @@ public class Remotery implements Profiler {
 		}
 	}
 
-	public static void beginCPUSample(String name, boolean aggregate) {
+	public static CPUSample beginCPUSample(String name, boolean aggregate) {
 
-		Sample sample = cacheCPUSamples.getOrDefault(name, defaultSample);
+		CPUSample sample = cacheCPUSamples.getOrDefault(name, defaultCPUSample);
 
 		if (sample.name == 0) {
-			sample = new Sample(name, 0);
+			sample = new CPUSample(name, 0);
 			cacheCPUSamples.put(name, sample);
 		}
 
@@ -106,16 +130,23 @@ public class Remotery implements Profiler {
 		if (sample.hash == 0) {
 			sample.hash = hash;
 		}
+
+		return sample;
 	}
 
 	@Override
-	public void sampleCPU(String name, boolean aggregate, Runnable runnable) {
+	public AutoCloseable sampleCPU(String name, boolean aggregate) {
+		return beginCPUSample(name, aggregate);
+	}
+
+	@Override
+	public <T> void sampleCPU(String name, boolean aggregate, T context, Consumer<T> consumer) {
 
 		if (initialized) {
 			beginCPUSample(name, aggregate);
 		}
 
-		runnable.run();
+		consumer.accept(context);
 
 		if (initialized) {
 			endCPUSample();
@@ -138,12 +169,12 @@ public class Remotery implements Profiler {
 		}
 	}
 
-	public static void beginOpenGLSample(String name) {
+	public static OpenGLSample beginOpenGLSample(String name) {
 
-		Sample sample = cacheOpenGLSamples.getOrDefault(name, defaultSample);
+		OpenGLSample sample = cacheOpenGLSamples.getOrDefault(name, defaultOpenGLSample);
 
 		if (sample.name == 0) {
-			sample = new Sample(name, 0);
+			sample = new OpenGLSample(name, 0);
 			cacheOpenGLSamples.put(name, sample);
 		}
 
@@ -152,16 +183,23 @@ public class Remotery implements Profiler {
 		if (sample.hash == 0) {
 			sample.hash = hash;
 		}
+
+		return sample;
 	}
 
 	@Override
-	public void sampleOpenGL(String name, Runnable runnable) {
+	public AutoCloseable sampleOpenGL(String name) {
+		return beginOpenGLSample(name);
+	}
+
+	@Override
+	public <T> void sampleOpenGL(String name, T context, Consumer<T> consumer) {
 
 		if (initializedOpenGL) {
 			beginOpenGLSample(name);
 		}
 
-		runnable.run();
+		consumer.accept(context);
 
 		if (initializedOpenGL) {
 			endOpenGLSample();
