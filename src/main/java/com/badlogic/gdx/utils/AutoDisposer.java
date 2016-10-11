@@ -81,6 +81,12 @@ public class AutoDisposer {
 
 	}
 
+	public static void dispose(Object[] objects) {
+		for (Object object : objects) {
+			dispose(object);
+		}
+	}
+
 	private static void dispose(Object object, Class<?> type) {
 
 		// null check
