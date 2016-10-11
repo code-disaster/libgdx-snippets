@@ -6,8 +6,11 @@ import com.badlogic.gdx.utils.GdxRuntimeException;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.function.Consumer;
@@ -66,7 +69,16 @@ public class ClassFinder {
 
 		for (URL url : urls) {
 
-			FileHandle file = new FileHandle(url.getFile());
+			Path path;
+
+			// required for Windows paths with spaces
+			try {
+				path = Paths.get(url.toURI());
+			} catch (URISyntaxException e) {
+				throw new GdxRuntimeException(e);
+			}
+
+			FileHandle file = new FileHandle(path.toFile());
 
 			if (file.isDirectory()) {
 
