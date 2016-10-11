@@ -11,7 +11,7 @@ public class SHA1 {
 
 	private final byte[] value = new byte[20];
 
-	private static final SHA1 Zero = new SHA1();
+	public static final SHA1 Zero = new SHA1();
 
 	private SHA1() {
 

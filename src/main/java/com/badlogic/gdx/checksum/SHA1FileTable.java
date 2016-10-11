@@ -4,7 +4,6 @@ import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.utils.*;
 
 import java.io.*;
-import java.security.NoSuchAlgorithmException;
 
 public class SHA1FileTable {
 
@@ -89,7 +88,7 @@ public class SHA1FileTable {
 	/**
 	 * Checks the SHA1 hash of a file against the SHA1 stored in the table.
 	 */
-	public CheckFileResult checkFile(File file) throws NoSuchAlgorithmException {
+	public CheckFileResult checkFile(File file) {
 
 		if (!isKnownFile(file)) {
 			return CheckFileResult.NoSHA1SumFound;
@@ -104,7 +103,7 @@ public class SHA1FileTable {
 				return entry.checkResult;
 			}
 
-			SHA1 sha1 = processFile(file);
+			SHA1 sha1 = FileUtils.hashStream(new FileInputStream(file));
 
 			if (sha1.equals(entry.sha1)) {
 				entry.checkResult = CheckFileResult.Unmodified;
@@ -123,9 +122,9 @@ public class SHA1FileTable {
 	/**
 	 * Adds a file and its hash to the SHA1 table.
 	 */
-	public void registerFile(File file) throws IOException, NoSuchAlgorithmException {
+	public void registerFile(File file) throws IOException {
 
-		SHA1 sha1 = processFile(file);
+		SHA1 sha1 = FileUtils.hashStream(new FileInputStream(file));
 
 		if (isKnownFile(file)) {
 			Entry entry = entries.get(file.getPath());
@@ -157,28 +156,6 @@ public class SHA1FileTable {
 
 	private boolean isKnownFile(File file) {
 		return entries.containsKey(file.getPath());
-	}
-
-	private SHA1 processFile(File file) throws IOException, NoSuchAlgorithmException {
-
-		try (BufferedInputStream input = new BufferedInputStream(new FileInputStream(file))) {
-
-			SHA1 sha1 = SHA1.create();
-
-			int n = 0;
-			byte[] buffer = new byte[8192];
-			while (n != -1) {
-				n = input.read(buffer);
-				if (n > 0) {
-					SHA1.update(sha1, buffer, 0, n);
-				}
-			}
-
-			SHA1.submit(sha1);
-
-			return sha1;
-
-		}
 	}
 
 }
