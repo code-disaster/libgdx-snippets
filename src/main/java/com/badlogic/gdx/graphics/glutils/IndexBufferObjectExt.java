@@ -26,7 +26,7 @@ public class IndexBufferObjectExt extends GLBufferObject<ShortBuffer> {
 		buffer.limit(buffer.capacity());
 	}
 
-	public void addIndices(short[] indices, int count) {
+	public void addIndices(int count, short... indices) {
 		buffer.put(indices, 0, count);
 	}
 

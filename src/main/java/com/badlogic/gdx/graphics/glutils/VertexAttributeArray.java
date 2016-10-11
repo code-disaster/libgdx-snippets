@@ -69,6 +69,10 @@ public class VertexAttributeArray {
 		this(0, attributes);
 	}
 
+	public VertexAttributeArray(VertexAttributeArray other) {
+		this(other.vertexStride, other.attributes);
+	}
+
 	public VertexAttributeArray(int vertexStride, Attribute... attributes) {
 
 		this.attributes = Arrays.copyOf(attributes, attributes.length);

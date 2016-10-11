@@ -26,7 +26,7 @@ public class VertexBufferObjectExt extends GLBufferObject<FloatBuffer> {
 		buffer.limit(buffer.capacity());
 	}
 
-	public void addVertices(float[] vertices, int count) {
+	public void addVertices(int count, float... vertices) {
 		buffer.put(vertices, 0, count);
 	}
 

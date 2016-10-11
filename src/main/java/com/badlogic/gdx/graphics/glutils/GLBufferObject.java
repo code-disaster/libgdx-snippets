@@ -54,6 +54,7 @@ abstract class GLBufferObject<T extends Buffer> implements Disposable {
 	}
 
 	public void uploadData() {
+		buffer.flip();
 		byteBuffer.limit(buffer.limit() * wordSize);
 		gl20.glBufferData(target, byteBuffer.limit(), byteBuffer, usage);
 	}
