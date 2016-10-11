@@ -3,8 +3,7 @@ package com.badlogic.gdx.graphics.glutils;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.utils.BufferUtils;
 
-import java.nio.FloatBuffer;
-import java.nio.IntBuffer;
+import java.nio.*;
 
 import static com.badlogic.gdx.Gdx.gl30;
 import static com.badlogic.gdx.graphics.GL30.*;
@@ -439,6 +438,22 @@ public class MultiTargetFrameBuffer extends GLFrameBuffer<Texture> {
 		public boolean isManaged() {
 			return true;
 		}
+	}
+
+	public static void readColorBuffer(Pixmap target,
+									   MultiTargetFrameBuffer source, int srcIndex,
+									   int srcX0, int srcY0, int srcX1, int srcY1) {
+
+		gl30.glBindFramebuffer(GL_READ_FRAMEBUFFER, source.getFramebufferHandle());
+		gl30.glReadBuffer(GL_COLOR_ATTACHMENT0 + srcIndex);
+
+		gl30.glPixelStorei(GL_PACK_ALIGNMENT, 1);
+
+		ByteBuffer pixels = target.getPixels();
+		gl30.glReadPixels(srcX0, srcY0, srcX1 - srcX0, srcY1 - srcY0, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
+
+		gl30.glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
+		gl30.glReadBuffer(GL_BACK);
 	}
 
 	public static void copyDepthStencilBuffer(MultiTargetFrameBuffer target,
