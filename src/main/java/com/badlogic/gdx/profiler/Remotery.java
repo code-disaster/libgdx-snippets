@@ -17,36 +17,34 @@ public class Remotery implements Profiler {
 	private static Map<String, CPUSample> cacheCPUSamples = new ConcurrentHashMap<>();
 	private static Map<String, OpenGLSample> cacheOpenGLSamples = new ConcurrentHashMap<>();
 
-	private abstract static class Sample implements AutoCloseable {
+	private static class CPUSample extends Sample {
+
 		long name;
 		int hash;
 
-		Sample(String name, int hash) {
+		CPUSample(String name, int hash) {
 			this.name = name != null ? strdupNativeName(name) : 0L;
 			this.hash = hash;
 		}
-	}
-
-	public static class CPUSample extends Sample {
-
-		CPUSample(String name, int hash) {
-			super(name, hash);
-		}
 
 		@Override
-		public void close() throws Exception {
+		public void end() {
 			endCPUSample();
 		}
 	}
 
-	public static class OpenGLSample extends Sample {
+	private static class OpenGLSample extends Sample {
+
+		long name;
+		int hash;
 
 		OpenGLSample(String name, int hash) {
-			super(name, hash);
+			this.name = name != null ? strdupNativeName(name) : 0L;
+			this.hash = hash;
 		}
 
 		@Override
-		public void close() throws Exception {
+		public void end() {
 			endOpenGLSample();
 		}
 	}
@@ -135,7 +133,7 @@ public class Remotery implements Profiler {
 	}
 
 	@Override
-	public AutoCloseable sampleCPU(String name, boolean aggregate) {
+	public Sample sampleCPU(String name, boolean aggregate) {
 		return beginCPUSample(name, aggregate);
 	}
 
@@ -188,7 +186,7 @@ public class Remotery implements Profiler {
 	}
 
 	@Override
-	public AutoCloseable sampleOpenGL(String name) {
+	public Sample sampleOpenGL(String name) {
 		return beginOpenGLSample(name);
 	}
 

@@ -7,25 +7,13 @@ import java.util.function.Consumer;
  */
 public interface Profiler {
 
-	default AutoCloseable sampleCPU(String name, boolean aggregate) {
-		return () -> {};
-	}
-
-	default void sampleCPU(String name, boolean aggregate, Runnable runnable) {
-		sampleCPU(name, aggregate, null, nil -> runnable.run());
-	}
+	Sample sampleCPU(String name, boolean aggregate);
 
 	default <T> void sampleCPU(String name, boolean aggregate, T context, Consumer<T> consumer) {
 		consumer.accept(context);
 	}
 
-	default AutoCloseable sampleOpenGL(String name) {
-		return () -> {};
-	}
-
-	default void sampleOpenGL(String name, Runnable runnable) {
-		sampleOpenGL(name, null, nil -> runnable.run());
-	}
+	Sample sampleOpenGL(String name);
 
 	default <T> void sampleOpenGL(String name, T context, Consumer<T> consumer) {
 		consumer.accept(context);
