@@ -14,6 +14,7 @@ import java.nio.ByteOrder;
  */
 public class Memory {
 
+	private static final Unsafe theUnsafe;
 	private static final long addressFieldOffset;
 
 	/**
@@ -61,6 +62,14 @@ public class Memory {
 		memset(address, value, offset, count);
 	}
 
+	public static void memsetDirect(long address, byte value, int offset, int count) {
+		memset(address, value, offset, count);
+	}
+
+	public static long getAddress(ByteBuffer buffer) {
+		return theUnsafe.getLong(buffer, addressFieldOffset);
+	}
+
 	private static Unsafe getUnsafe() {
 		try {
 			Field f = Unsafe.class.getDeclaredField("theUnsafe");
@@ -71,13 +80,10 @@ public class Memory {
 		}
 	}
 
-	private static long getAddress(ByteBuffer buffer) {
-		return getUnsafe().getLong(buffer, addressFieldOffset);
-	}
-
 	static {
 		try {
-			addressFieldOffset = getUnsafe().objectFieldOffset(Buffer.class.getDeclaredField("address"));
+			theUnsafe = getUnsafe();
+			addressFieldOffset = theUnsafe.objectFieldOffset(Buffer.class.getDeclaredField("address"));
 		} catch (NoSuchFieldException e) {
 			throw new RuntimeException(e);
 		}

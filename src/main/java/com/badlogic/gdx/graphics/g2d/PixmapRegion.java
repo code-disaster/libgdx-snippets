@@ -2,14 +2,18 @@ package com.badlogic.gdx.graphics.g2d;
 
 import com.badlogic.gdx.graphics.Pixmap;
 
+import java.nio.ByteBuffer;
+
 /**
  * Defines a rectangular area of a {@link Pixmap}.
  */
 public class PixmapRegion {
 
 	private Pixmap pixmap;
+	private ByteBuffer pixels;
 	private int x, y;
 	private int width, height;
+	private int pixelStride, lineStride;
 
 	public PixmapRegion() {
 
@@ -35,20 +39,29 @@ public class PixmapRegion {
 		setRegion(pixmap, region.x, region.y, region.width, region.height);
 	}
 
+	private void changePixmap(Pixmap pixmap) {
+		this.pixmap = pixmap;
+		pixels = pixmap.getPixels();
+		pixelStride = PixmapUtils.getPixelStride(pixmap.getFormat());
+		lineStride = pixmap.getWidth() * pixelStride;
+	}
+
 	public Pixmap getPixmap() {
 		return pixmap;
 	}
 
 	public int getPixel(int x, int y) {
-		return pixmap.getPixel(this.x + x, this.y + y);
+		int offset = (this.y + y) * lineStride + (this.x + x) * pixelStride;
+		return pixels.getInt(offset);
 	}
 
 	public void drawPixel(int x, int y, int color) {
-		pixmap.drawPixel(this.x + x, this.y + y, color);
+		int offset = (this.y + y) * lineStride + (this.x + x) * pixelStride;
+		pixels.putInt(offset, color);
 	}
 
 	public void setRegion(PixmapRegion region) {
-		this.pixmap = region.pixmap;
+		changePixmap(region.pixmap);
 		this.x = region.x;
 		this.y = region.y;
 		this.width = region.width;
@@ -56,7 +69,7 @@ public class PixmapRegion {
 	}
 
 	public void setRegion(Pixmap pixmap, int x, int y, int width, int height) {
-		this.pixmap = pixmap;
+		changePixmap(pixmap);
 		this.x = x;
 		this.y = y;
 		this.width = width;
