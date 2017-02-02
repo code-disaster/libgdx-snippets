@@ -1,6 +1,7 @@
 package com.badlogic.gdx.graphics.g2d;
 
 import com.badlogic.gdx.graphics.Pixmap;
+import com.badlogic.gdx.utils.GdxRuntimeException;
 
 import java.nio.ByteBuffer;
 
@@ -51,11 +52,37 @@ public class PixmapRegion {
 	}
 
 	public int getPixel(int x, int y) {
+		if (pixelStride != 4) {
+			throw new GdxRuntimeException("Unsupported format");
+		}
 		int offset = (this.y + y) * lineStride + (this.x + x) * pixelStride;
 		return pixels.getInt(offset);
 	}
 
+	public int getPixelSlow(int x, int y) {
+		if (pixelStride < 3) {
+			throw new GdxRuntimeException("Unsupported format");
+		}
+
+		int offset = (this.y + y) * lineStride + (this.x + x) * pixelStride;
+		int r = Byte.toUnsignedInt(pixels.get(offset));
+		int g = Byte.toUnsignedInt(pixels.get(offset + 1));
+		int b = Byte.toUnsignedInt(pixels.get(offset + 2));
+
+		int a;
+		if (pixelStride < 4) {
+			a = (r + g + b) >= 4 ? 0xff : 0;
+		} else {
+			a = pixels.get(offset + 3);
+		}
+
+		return (r << 24) | (g << 16) | (b << 8) | a;
+	}
+
 	public void drawPixel(int x, int y, int color) {
+		if (pixelStride != 4) {
+			throw new GdxRuntimeException("Unsupported format");
+		}
 		int offset = (this.y + y) * lineStride + (this.x + x) * pixelStride;
 		pixels.putInt(offset, color);
 	}

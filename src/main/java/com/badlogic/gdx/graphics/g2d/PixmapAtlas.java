@@ -28,6 +28,10 @@ public class PixmapAtlas implements Disposable {
 		load(data);
 	}
 
+	private PixmapAtlas() {
+
+	}
+
 	private void load(TextureAtlas.TextureAtlasData data) {
 
 		ObjectMap<TextureAtlas.TextureAtlasData.Page, AtlasPage> pageToPixmap = new ObjectMap<>();
@@ -95,6 +99,35 @@ public class PixmapAtlas implements Disposable {
 
 	public FileHandle getFolder() {
 		return pages.get(0).fileHandle.parent();
+	}
+
+	public static PixmapAtlas createFromPixmap(FileHandle pixmapFile, String regionName) {
+
+		Pixmap pixmap = new Pixmap(pixmapFile);
+
+		PixmapAtlas atlas = new PixmapAtlas();
+
+		// add single pixmap
+		atlas.pixmaps.add(pixmap);
+
+		// add one page
+		AtlasPage atlasPage = new AtlasPage(0, pixmapFile, pixmap);
+		atlas.pages.add(atlasPage);
+
+		// add one region
+		int width = pixmap.getWidth();
+		int height = pixmap.getHeight();
+
+		AtlasRegion atlasRegion = new AtlasRegion(pixmap, 0, 0, width, height);
+
+		atlasRegion.page = atlasPage;
+		atlasRegion.index = 0;
+		atlasRegion.name = regionName;
+		atlasRegion.rotate = false;
+
+		atlas.regions.add(atlasRegion);
+
+		return atlas;
 	}
 
 	public static class AtlasRegion extends PixmapRegion {

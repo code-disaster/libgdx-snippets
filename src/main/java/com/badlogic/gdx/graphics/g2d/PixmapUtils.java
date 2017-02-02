@@ -9,24 +9,31 @@ import java.nio.ByteBuffer;
 public class PixmapUtils {
 
 	/**
-	 * Sets alpha to 0xff for all pixels matching the RGB value of {@code color}.
+	 * Sets alpha for all pixels matching one of the RGB values in {@code colors[]}.
 	 */
-	public static void mask(Pixmap pixmap, Color color, float alpha) {
+	public static void mask(Pixmap pixmap, float alpha, Color... colors) {
 
 		ByteBuffer pixels = pixmap.getPixels();
 
-		int mask = color.toIntBits();
-		mask = ((mask & 0xff0000) >> 16) | (mask & 0xff00) | ((mask & 0xff) << 16);
+		int[] masks = new int[colors.length];
+		for (int i = 0; i < colors.length; i++) {
+			masks[i] = colors[i].toIntBits();
+			masks[i] = ((masks[i] & 0xff0000) >> 16) | (masks[i] & 0xff00) | ((masks[i] & 0xff) << 16);
+		}
 
 		int a = MathUtils.floor(alpha * 255.0f) & 0xff;
 
 		while (pixels.remaining() > 0) {
 
 			int rgba = pixels.getInt();
+			int rgb = rgba >>> 8;
 
-			if ((rgba >> 8) == mask) {
-				pixels.position(pixels.position() - 4);
-				pixels.putInt((rgba & 0xffffff00) | a);
+			for (int mask : masks) {
+				if (rgb == mask) {
+					pixels.position(pixels.position() - 4);
+					pixels.putInt((rgba & 0xffffff00) | a);
+					break;
+				}
 			}
 		}
 
@@ -124,6 +131,23 @@ public class PixmapUtils {
 		}
 
 		pixels.position(0);
+	}
+
+	public static int getPixelStride(Pixmap.Format format) {
+		switch (format) {
+			case Alpha:
+			case Intensity:
+				return 1;
+			case LuminanceAlpha:
+			case RGB565:
+			case RGBA4444:
+				return 2;
+			case RGB888:
+				return 3;
+			case RGBA8888:
+				return 4;
+		}
+		throw new IllegalArgumentException("Not implemented");
 	}
 
 }
