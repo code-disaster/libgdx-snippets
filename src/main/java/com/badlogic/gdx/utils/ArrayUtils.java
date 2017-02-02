@@ -1,10 +1,9 @@
 package com.badlogic.gdx.utils;
 
-import com.badlogic.gdx.function.BooleanFunction;
-
 import javax.annotation.Nonnull;
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 /**
  * Array utility functions.
@@ -28,9 +27,9 @@ public class ArrayUtils {
 	 * <p>
 	 * @return true if end of array was reached
 	 */
-	public static <T> boolean forEachWhile(T[] array, BooleanFunction<T> action) {
+	public static <T> boolean forEachWhile(T[] array, Predicate<T> predicate) {
 		for (T t : array) {
-			if (!action.apply(t)) {
+			if (!predicate.test(t)) {
 				return false;
 			}
 		}
@@ -42,9 +41,9 @@ public class ArrayUtils {
 	 * <p>
 	 * @return true if end of array was reached
 	 */
-	public static <T> boolean forEachWhile(Array<T> array, BooleanFunction<T> action) {
+	public static <T> boolean forEachWhile(Array<T> array, Predicate<T> action) {
 		for (T t : array) {
-			if (!action.apply(t)) {
+			if (!action.test(t)) {
 				return false;
 			}
 		}
@@ -56,9 +55,9 @@ public class ArrayUtils {
 	 * <p>
 	 * Returns null if no match is found.
 	 */
-	public static <T> T find(T[] array, BooleanFunction<T> match) {
+	public static <T> T find(T[] array, Predicate<T> match) {
 		for (T t : array) {
-			if (match.apply(t)) {
+			if (match.test(t)) {
 				return t;
 			}
 		}
@@ -70,9 +69,9 @@ public class ArrayUtils {
 	 * <p>
 	 * Returns null if no match is found.
 	 */
-	public static <T> T find(Array<T> array, BooleanFunction<T> match) {
+	public static <T> T find(Array<T> array, Predicate<T> match) {
 		for (T t : array) {
-			if (match.apply(t)) {
+			if (match.test(t)) {
 				return t;
 			}
 		}
@@ -84,9 +83,9 @@ public class ArrayUtils {
 	 * <p>
 	 * Returns -1 if no match is found.
 	 */
-	public static <T> int findIndex(T[] array, BooleanFunction<T> match) {
+	public static <T> int findIndex(T[] array, Predicate<T> match) {
 		for (int i = 0; i < array.length; i++) {
-			if (match.apply(array[i])) {
+			if (match.test(array[i])) {
 				return i;
 			}
 		}
@@ -98,9 +97,9 @@ public class ArrayUtils {
 	 * <p>
 	 * Returns -1 if no match is found.
 	 */
-	public static <T> int findIndex(Array<T> array, BooleanFunction<T> match) {
+	public static <T> int findIndex(Array<T> array, Predicate<T> match) {
 		for (int i = 0; i < array.size; i++) {
-			if (match.apply(array.get(i))) {
+			if (match.test(array.get(i))) {
 				return i;
 			}
 		}
@@ -110,9 +109,9 @@ public class ArrayUtils {
 	/**
 	 * Iterates the array, consuming items only which fulfill the user-defined comparison.
 	 */
-	public static <T> void findAll(T[] array, BooleanFunction<T> match, Consumer<T> action) {
+	public static <T> void findAll(T[] array, Predicate<T> match, Consumer<T> action) {
 		for (T t : array) {
-			if (match.apply(t)) {
+			if (match.test(t)) {
 				action.accept(t);
 			}
 		}
@@ -174,6 +173,40 @@ public class ArrayUtils {
 				dest[i][j] = arrayOfArray[i - lowerDim0][j - lowerDim1];
 			}*/
 			System.arraycopy(arrayOfArray[i - lowerDim0], 0, dest[i], lowerDim1, rows - upperDim1 - lowerDim1);
+		}
+
+		return dest;
+	}
+
+	/**
+	 * Expands an existing three-dimensional array.
+	 * <p>
+	 * This is a very memory-inefficient operation.
+	 */
+	@SuppressWarnings("unchecked")
+	public static <T> T[][][] expand(T[][][] arrayOfArrayOfArray, Class<T> clazz,
+								   int lowerDim0, int upperDim0, int lowerDim1, int upperDim1) {
+
+		int columns = arrayOfArrayOfArray.length + lowerDim0 + upperDim0;
+		int rows = arrayOfArrayOfArray[0].length + lowerDim1 + upperDim1;
+		int depth = arrayOfArrayOfArray[0][0].length;
+
+		Object copy = java.lang.reflect.Array.newInstance(clazz, columns, rows, depth);
+
+		T[][][] dest = (T[][][]) copy;
+
+		for (int i = lowerDim0; i < columns - upperDim0; i++) {
+			for (int j = lowerDim1; j < rows - upperDim1; j++) {
+				/*for (int k = 0; k < depth; k++) {
+					dest[i][j][k] = arrayOfArrayOfArray[i - lowerDim0][j - lowerDim1][k];
+				}*/
+				System.arraycopy(
+						arrayOfArrayOfArray[i - lowerDim0][j - lowerDim1],
+						0,
+						dest[i][j],
+						0,
+						depth);
+			}
 		}
 
 		return dest;

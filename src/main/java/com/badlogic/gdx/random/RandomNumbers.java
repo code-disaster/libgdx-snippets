@@ -22,6 +22,10 @@ public final class RandomNumbers {
 		return (int) nextLong(n);
 	}
 
+	public int nextInt(int start, int end) {
+		return start + nextInt(end - start + 1);
+	}
+
 	public long nextLong() {
 		return generator.next();
 	}

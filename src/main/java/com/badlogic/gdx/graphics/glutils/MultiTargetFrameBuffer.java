@@ -268,6 +268,12 @@ public class MultiTargetFrameBuffer extends GLFrameBuffer<Texture> {
 		return colorTextures[index];
 	}
 
+	@Override
+	protected void attachFrameBufferColorTexture() {
+		gl30.glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
+				colorTexture.getTextureObjectHandle(), 0);
+	}
+
 	public void clampToBorder(int index, Color color) {
 		int handle = colorTextures[index].getTextureObjectHandle();
 		gl30.glBindTexture(GL_TEXTURE_2D, handle);

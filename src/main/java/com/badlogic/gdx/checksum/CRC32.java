@@ -82,6 +82,11 @@ public class CRC32 {
 		return String.format("%08x", value);
 	}
 
+	public static CRC32 reset(CRC32 checksum) {
+		checksum.value = 0;
+		return checksum;
+	}
+
 	public static boolean isNullOrZero(CRC32 checksum) {
 		return checksum == null || checksum.value == 0;
 	}
