@@ -10,8 +10,6 @@ import java.util.function.*;
  * Implementation of {@link com.badlogic.gdx.utils.Json.Serializer} to serialize {@link Map} containers.
  *
  * This is used internally by {@link AnnotatedJsonSerializer}.
- *
- * @see {@link AnnotatedJsonSerializer}
  */
 class JsonMapSerializer<K, V> implements Json.Serializer<Iterable<?>> {
 
@@ -81,7 +79,7 @@ class JsonMapSerializer<K, V> implements Json.Serializer<Iterable<?>> {
 		return values;
 	}
 
-	public interface KeyValueConsumer<M, K, V> {
+	interface KeyValueConsumer<M, K, V> {
 		void accept(M map, K key, V value);
 	}
 

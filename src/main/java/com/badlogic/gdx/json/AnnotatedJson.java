@@ -5,7 +5,7 @@ import com.badlogic.gdx.lang.ClassFinder;
 import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.JsonWriter;
 
-import java.io.IOException;
+import java.io.*;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
@@ -15,16 +15,24 @@ import java.util.function.Predicate;
  */
 public class AnnotatedJson {
 
-	public static <T> T read(FileHandle path, Class<T> clazz, Consumer<Json> setupJson) throws IOException {
+	public static <T> Json newReader(Class<T> clazz, Consumer<Json> setupJson) {
 
 		Json json = new Json();
-
 		json.setSerializer(clazz, new AnnotatedJsonSerializer<>(json, clazz));
 
 		if (setupJson != null) {
 			setupJson.accept(json);
 		}
 
+		return json;
+	}
+
+	public static <T> T read(FileHandle path, Class<T> clazz, Consumer<Json> setupJson) throws IOException {
+		Json json = newReader(clazz, setupJson);
+		return read(path, clazz, json);
+	}
+
+	public static <T> T read(FileHandle path, Class<T> clazz, Json json) throws IOException {
 		try {
 			return json.fromJson(clazz, path);
 		} catch (RuntimeException e) {
@@ -32,7 +40,7 @@ public class AnnotatedJson {
 		}
 	}
 
-	public static <T> void write(FileHandle path, T object, Class<T> clazz, Consumer<Json> setupJson) {
+	public static <T> Json newWriter(Class<T> clazz, Consumer<Json> setupJson) {
 
 		Json json = new Json(JsonWriter.OutputType.json);
 		json.setSerializer(clazz, new AnnotatedJsonSerializer<>(json, clazz));
@@ -41,10 +49,25 @@ public class AnnotatedJson {
 			setupJson.accept(json);
 		}
 
+		return json;
+	}
+
+	public static <T> void write(FileHandle path, T object, Class<T> clazz, Consumer<Json> setupJson) throws IOException {
+		Json json = newWriter(clazz, setupJson);
+		write(path, object, json);
+	}
+
+	public static <T> void write(FileHandle path, T object, Json json) throws IOException {
+
 		String output = json.toJson(object);
 		String prettyOutput = json.prettyPrint(output);
 
-		path.writeString(prettyOutput, false, "UTF-8");
+		try (FileOutputStream fos = new FileOutputStream(path.file(), false)) {
+			try (Writer writer = new OutputStreamWriter(fos, "UTF-8")) {
+				writer.write(prettyOutput);
+				writer.flush();
+			}
+		}
 	}
 
 	/**

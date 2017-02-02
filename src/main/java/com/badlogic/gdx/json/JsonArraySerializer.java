@@ -8,8 +8,6 @@ import com.badlogic.gdx.utils.reflect.ArrayReflection;
  * Implementation of {@link com.badlogic.gdx.utils.Json.Serializer} to serialize {@link Array} containers.
  *
  * This is used internally by {@link AnnotatedJsonSerializer}.
- *
- * @see {@link AnnotatedJsonSerializer}
  */
 class JsonArraySerializer<V> implements Json.Serializer<Array<?>> {
 

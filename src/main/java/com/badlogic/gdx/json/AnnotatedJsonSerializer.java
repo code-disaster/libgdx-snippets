@@ -73,6 +73,10 @@ public class AnnotatedJsonSerializer<T> implements Json.Serializer<T> {
 	@Override
 	public void write(Json json, T object, Class knownType) {
 
+		if (AnnotatedJsonObject.class.isAssignableFrom(clazz)) {
+			((AnnotatedJsonObject) object).onJsonWrite();
+		}
+
 		json.writeObjectStart();
 
 		if (annotation.dynamic()) {
@@ -266,6 +270,10 @@ public class AnnotatedJsonSerializer<T> implements Json.Serializer<T> {
 				}
 			}
 
+			if (AnnotatedJsonObject.class.isAssignableFrom(clazz)) {
+				((AnnotatedJsonObject) object).onJsonRead();
+			}
+
 			return object;
 
 		} catch (ReflectionException | ClassNotFoundException e) {
@@ -308,7 +316,21 @@ public class AnnotatedJsonSerializer<T> implements Json.Serializer<T> {
 				value = JsonFloatSerializer.decodeDoubleBits(
 						json.readValue(accessible.getName(), String.class, jsonData), accessible.get(object));
 			} else {
-				value = json.readValue(accessible.getName(), fieldType, componentType, jsonData);
+				try {
+					value = json.readValue(accessible.getName(), fieldType, componentType, jsonData);
+				} catch (SerializationException e) {
+					// attempt to load again, using bit decoder - this allows loading of existing
+					// data after an encodeFP() annotation property has been removed
+					if (fieldType.equals(float.class)) {
+						value = JsonFloatSerializer.decodeFloatBits(
+								json.readValue(accessible.getName(), String.class, jsonData), accessible.get(object));
+					} else if (fieldType.equals(double.class)) {
+						value = JsonFloatSerializer.decodeDoubleBits(
+								json.readValue(accessible.getName(), String.class, jsonData), accessible.get(object));
+					} else {
+						throw new SerializationException(e);
+					}
+				}
 			}
 
 			if (value == null) {
