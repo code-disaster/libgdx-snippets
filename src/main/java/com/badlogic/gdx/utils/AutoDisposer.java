@@ -107,6 +107,12 @@ public class AutoDisposer {
 			dispose(object);
 		}
 
+		// check if the field is an iterable container
+
+		if (ClassReflection.isAssignableFrom(Iterable.class, type)) {
+			Iterable<?> iterable = (Iterable<?>) object;
+			iterable.forEach(AutoDisposer::dispose);
+		}
 	}
 
 	private static void disposeArray(Object object) {

@@ -13,9 +13,13 @@ public class ShaderProgramExt implements Disposable {
 	private int handle;
 	private Program program;
 	private Consumer<Integer> onCreate;
+	private Runnable onDispose;
 
-	public ShaderProgramExt(String vertexShader, String fragmentShader, Consumer<Integer> onCreate) {
+	public ShaderProgramExt(String vertexShader, String fragmentShader,
+							Consumer<Integer> onCreate, Runnable onDispose) {
+
 		this.onCreate = onCreate;
+		this.onDispose = onDispose;
 		this.program = new Program(vertexShader, fragmentShader);
 	}
 
@@ -32,6 +36,12 @@ public class ShaderProgramExt implements Disposable {
 
 		public Program(String vertexShader, String fragmentShader) {
 			super(vertexShader, fragmentShader);
+		}
+
+		@Override
+		public void dispose() {
+			onDispose.run();
+			super.dispose();
 		}
 
 		@Override
