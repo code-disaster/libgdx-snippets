@@ -179,7 +179,7 @@ public class ArrayUtils {
 	}
 
 	/**
-	 * Expands an existing two-dimensional array.
+	 * Expands an existing three-dimensional array.
 	 * <p>
 	 * This is a very memory-inefficient operation.
 	 */

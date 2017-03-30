@@ -55,8 +55,17 @@ public class PixmapRegion {
 		if (pixelStride != 4) {
 			throw new GdxRuntimeException("Unsupported format");
 		}
+		if (x < 0 || x >= width || y < 0 || y >= height) {
+			throw new GdxRuntimeException("Out of bounds");
+		}
 		int offset = (this.y + y) * lineStride + (this.x + x) * pixelStride;
 		return pixels.getInt(offset);
+	}
+
+	public int getPixel(int x, int y, boolean flipX, boolean flipY) {
+		return getPixel(
+				flipX ? width - 1 - x : x,
+				flipY ? height - 1 - y : y);
 	}
 
 	public int getPixelSlow(int x, int y) {
