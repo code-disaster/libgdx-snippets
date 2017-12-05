@@ -2,7 +2,7 @@ package com.badlogic.gdx.scenes.scene2d.ui;
 
 public class StageLayoutAdapter implements StageLayoutListener {
 
-	private StageLayoutListener listener;
+	protected StageLayoutListener listener;
 
 	public StageLayoutAdapter(StageLayoutListener listener) {
 		this.listener = listener;

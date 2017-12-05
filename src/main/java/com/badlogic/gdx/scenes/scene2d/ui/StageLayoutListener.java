@@ -17,4 +17,11 @@ public interface StageLayoutListener {
 
 	}
 
+	/**
+	 * Used by {@link LabelLayout} to localize the label text.
+	 */
+	default String getTranslation(String text) {
+		return text;
+	}
+
 }
