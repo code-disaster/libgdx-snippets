@@ -1,5 +1,7 @@
 package com.badlogic.gdx.utils;
 
+import com.badlogic.gdx.random.RandomNumbers;
+
 import javax.annotation.Nonnull;
 import java.util.*;
 import java.util.function.Consumer;
@@ -407,6 +409,34 @@ public class ArrayUtils {
 		public int size() {
 			return size;
 		}
+	}
+
+	/**
+	 * Shuffles an array, just like {@link Array#shuffle()}, but with a user-provided
+	 * random number generator.
+	 */
+	public static <T> void shuffle(Array<T> array, RandomNumbers random) {
+		shuffle(array.items, array.size - 1, random);
+	}
+
+	/**
+	 * Shuffles an array with a user-provided random number generator.
+	 */
+	public static <T> void shuffle(T[] array, int length, RandomNumbers random) {
+		for (int i = length - 1; i > 0; i--) {
+			int ii = random.nextInt(i);
+			if (i != ii) {
+				T temp = array[i];
+				array[i] = array[ii];
+				array[ii] = temp;
+			}
+		}
+	}
+
+	public static <T> Array<T> singleton(T element) {
+		Array<T> array = new Array<>();
+		array.add(element);
+		return array;
 	}
 
 }

@@ -14,16 +14,12 @@ public class AsyncTaskExecutor implements Disposable {
 
 	private final ExecutorService service;
 
-	public AsyncTaskExecutor(int threadCount) {
+	public AsyncTaskExecutor(int threadCount, String threadNamePrefix) {
 
 		threadCount = Math.max(threadCount, 1);
-		GdxSnippets.log.info("Starting AsyncTaskExecutor with {} threads.", threadCount);
+		GdxSnippets.log.info("Starting {} with {} threads.", threadNamePrefix, threadCount);
 
-		if (threadCount <= 1) {
-			service = Executors.newSingleThreadExecutor(new Factory("AsyncTask-Single-"));
-		} else {
-			service = Executors.newFixedThreadPool(threadCount, new Factory("AsyncTask-Pool-"));
-		}
+		service = new FixedThreadPoolExecutor(threadCount, new Factory(threadNamePrefix));
 	}
 
 	public <V extends AsyncTaskJob<V>>
@@ -57,9 +53,38 @@ public class AsyncTaskExecutor implements Disposable {
 
 		@Override
 		public Thread newThread(@Nonnull Runnable runnable) {
-			Thread thread = new Thread(group, runnable, namePrefix + threadNumber.getAndIncrement());
+			Thread thread = new Thread(group, runnable, namePrefix + "-" + threadNumber.getAndIncrement());
 			thread.setDaemon(true);
 			return thread;
+		}
+	}
+
+	private static class FixedThreadPoolExecutor extends ThreadPoolExecutor {
+
+		FixedThreadPoolExecutor(int nThreads, ThreadFactory threadFactory) {
+			super(nThreads, nThreads,
+					0L, TimeUnit.MILLISECONDS,
+					new LinkedBlockingQueue<>(),
+					threadFactory);
+		}
+
+		@Override
+		protected void afterExecute(Runnable r, Throwable t) {
+			super.afterExecute(r, t);
+			if (t == null && r instanceof Future<?>) {
+				try {
+					Object result = ((Future<?>) r).get();
+				} catch (CancellationException ce) {
+					t = ce;
+				} catch (ExecutionException ee) {
+					t = ee.getCause();
+				} catch (InterruptedException ie) {
+					Thread.currentThread().interrupt(); // ignore/reset
+				}
+			}
+			if (t != null) {
+				GdxSnippets.log.error("thread pool execution error", t);
+			}
 		}
 	}
 

@@ -2,8 +2,7 @@ package com.badlogic.gdx.json;
 
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.lang.ClassFinder;
-import com.badlogic.gdx.utils.Json;
-import com.badlogic.gdx.utils.JsonWriter;
+import com.badlogic.gdx.utils.*;
 
 import java.io.*;
 import java.util.function.Consumer;
@@ -34,7 +33,13 @@ public class AnnotatedJson {
 
 	public static <T> T read(FileHandle path, Class<T> clazz, Json json) throws IOException {
 		try {
-			return json.fromJson(clazz, path);
+			InputStream fileStream = path.read();
+			BufferedInputStream stream = new BufferedInputStream(fileStream);
+			Reader reader = new InputStreamReader(stream, "UTF-8");
+			return json.fromJson(clazz, reader);
+		} catch (SerializationException e) {
+			GdxSnippets.log.error("Error while serializing class " + clazz.getName(), e);
+			throw new IOException(e.getCause());
 		} catch (RuntimeException e) {
 			throw new IOException(e);
 		}
@@ -54,13 +59,22 @@ public class AnnotatedJson {
 
 	public static <T> void write(FileHandle path, T object, Class<T> clazz, Consumer<Json> setupJson) throws IOException {
 		Json json = newWriter(clazz, setupJson);
-		write(path, object, json);
+		write(path, false, object, json);
+	}
+
+	public static <T> void write(FileHandle path, boolean compact, T object, Class<T> clazz, Consumer<Json> setupJson) throws IOException {
+		Json json = newWriter(clazz, setupJson);
+		write(path, compact, object, json);
 	}
 
 	public static <T> void write(FileHandle path, T object, Json json) throws IOException {
+		write(path, false, object, json);
+	}
+
+	public static <T> void write(FileHandle path, boolean compact, T object, Json json) throws IOException {
 
 		String output = json.toJson(object);
-		String prettyOutput = json.prettyPrint(output);
+		String prettyOutput = compact ? output : json.prettyPrint(output);
 
 		try (FileOutputStream fos = new FileOutputStream(path.file(), false)) {
 			try (Writer writer = new OutputStreamWriter(fos, "UTF-8")) {

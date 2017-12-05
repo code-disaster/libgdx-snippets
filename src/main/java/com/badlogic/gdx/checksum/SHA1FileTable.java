@@ -1,7 +1,8 @@
 package com.badlogic.gdx.checksum;
 
-import com.badlogic.gdx.files.FileHandle;
-import com.badlogic.gdx.utils.*;
+import com.badlogic.gdx.files.*;
+import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.ObjectMap;
 
 import java.io.*;
 
@@ -16,6 +17,7 @@ public class SHA1FileTable {
 	}
 
 	private static class Entry {
+
 		String filePath;
 		SHA1 sha1;
 		CheckFileResult checkResult;
@@ -46,7 +48,7 @@ public class SHA1FileTable {
 			return;
 		}
 
-		TextFileLineReader.readLines(
+		TextFileUtils.readLines(
 				sha1sumFile,
 				new String[] { "^[0-9a-fA-F]+\\s+[\\S]+$" },
 				line -> {
@@ -103,7 +105,7 @@ public class SHA1FileTable {
 				return entry.checkResult;
 			}
 
-			SHA1 sha1 = FileUtils.hashStream(new FileInputStream(file));
+			SHA1 sha1 = FileStreamReader.hashStream(new FileInputStream(file));
 
 			if (sha1.equals(entry.sha1)) {
 				entry.checkResult = CheckFileResult.Unmodified;
@@ -124,7 +126,7 @@ public class SHA1FileTable {
 	 */
 	public void registerFile(File file) throws IOException {
 
-		SHA1 sha1 = FileUtils.hashStream(new FileInputStream(file));
+		SHA1 sha1 = FileStreamReader.hashStream(new FileInputStream(file));
 
 		if (isKnownFile(file)) {
 			Entry entry = entries.get(file.getPath());

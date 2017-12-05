@@ -1,10 +1,11 @@
 # IntelliJ IDEA
-.idea/
+/.idea/
 *.iml
 
 # Maven
-target/
+/target/
 *.properties
 
 # Gradle
-build/
+/build/
+/out/

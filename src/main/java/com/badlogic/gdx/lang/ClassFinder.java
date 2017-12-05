@@ -8,10 +8,8 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.net.URLClassLoader;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -23,34 +21,11 @@ import java.util.jar.JarFile;
  */
 public class ClassFinder {
 
-	private final URLClassLoader classLoader;
 	private Array<URL> urls = new Array<>();
-
-	public ClassFinder() {
-		this(Thread.currentThread().getContextClassLoader());
-	}
-
-	public ClassFinder(ClassLoader classLoader) {
-		if (classLoader == null || !(classLoader instanceof URLClassLoader)) {
-			throw new GdxRuntimeException("Error obtaining class loader.");
-		}
-		this.classLoader = (URLClassLoader) classLoader;
-	}
-
-	/**
-	 * Enumerates all URLs registered to the {@link ClassLoader}.
-	 *
-	 * Must be called before {@link ClassFinder#process(Predicate, Consumer)}.
-	 */
-	public ClassFinder filter(Predicate<URL> filter) {
-		urls.clear();
-		Arrays.stream(classLoader.getURLs()).filter(filter::test).forEach(urls::add);
-		return this;
-	}
 
 	/**
 	 * Only uses the same URL as the given class was loaded from.
-	 *
+	 * <p>
 	 * Must be called before {@link ClassFinder#process(Predicate, Consumer)}.
 	 */
 	public ClassFinder filterURLforClass(Class<?> clazz) {
@@ -63,7 +38,7 @@ public class ClassFinder {
 	}
 
 	/**
-	 * Iterates classes of all URLs filtered by a previous call of {@link ClassFinder#filter(Predicate)}.
+	 * Iterates classes of all URLs filtered by a previous call of {@link ClassFinder#filterURLforClass(Class)}.
 	 */
 	public ClassFinder process(Predicate<String> filter, Consumer<Class<?>> processor) {
 

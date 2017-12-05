@@ -5,8 +5,32 @@ import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.math.MathUtils;
 
 import java.nio.ByteBuffer;
+import java.util.function.IntPredicate;
+
+import static com.badlogic.gdx.graphics.Pixmap.*;
 
 public class PixmapUtils {
+
+	/**
+	 * Create {@link Pixmap} with no blending and nearest filter.
+	 */
+	public static Pixmap create(int width, int height, Format format) {
+		return create(width, height, format, Blending.None, Filter.NearestNeighbour);
+	}
+
+	/**
+	 * Create {@link Pixmap} with given blending and filter.
+	 */
+	public static Pixmap create(int width, int height, Format format,
+								Blending blending, Filter filter) {
+
+		Pixmap pixmap = new Pixmap(width, height, format);
+
+		pixmap.setBlending(blending);
+		pixmap.setFilter(filter);
+
+		return pixmap;
+	}
 
 	/**
 	 * Sets alpha for all pixels matching one of the RGB values in {@code colors[]}.
@@ -40,7 +64,30 @@ public class PixmapUtils {
 		pixels.flip();
 	}
 
+	/**
+	 * Sets alpha for all pixels passing the RGB predicate function.
+	 */
+	public static void mask(Pixmap pixmap, float alpha, IntPredicate rgb) {
+
+		ByteBuffer pixels = pixmap.getPixels();
+
+		int a = MathUtils.floor(alpha * 255.0f) & 0xff;
+
+		while (pixels.remaining() > 0) {
+
+			int rgba = pixels.getInt();
+
+			if (rgb.test(rgba >>> 8)) {
+				pixels.position(pixels.position() - 4);
+				pixels.putInt((rgba & 0xffffff00) | a);
+			}
+		}
+
+		pixels.flip();
+	}
+
 	public interface CropResult {
+
 		void accept(int left, int bottom, int width, int height);
 	}
 
@@ -133,7 +180,7 @@ public class PixmapUtils {
 		pixels.position(0);
 	}
 
-	public static int getPixelStride(Pixmap.Format format) {
+	public static int getPixelStride(Format format) {
 		switch (format) {
 			case Alpha:
 			case Intensity:

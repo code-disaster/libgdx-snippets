@@ -55,6 +55,7 @@ public final class XoRoShiRo128Plus implements RandomNumberGenerator {
 		this.s1 = s1;
 	}
 
+	@Override
 	public void getSeed(long[] out) {
 		out[0] = s0;
 		out[1] = s1;

@@ -1,16 +1,13 @@
-package com.badlogic.gdx.utils;
+package com.badlogic.gdx.files;
 
-import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.function.ThrowableConsumer;
+import com.badlogic.gdx.utils.*;
+import com.badlogic.gdx.utils.StringBuilder;
 
-import java.io.BufferedReader;
-import java.io.IOException;
+import java.io.*;
 import java.util.regex.Pattern;
 
-/**
- * Text file reader utility.
- */
-public class TextFileLineReader {
+public class TextFileUtils {
 
 	/**
 	 * Reads the file as text, passing its content to the consumer function, line by line.
@@ -60,7 +57,43 @@ public class TextFileLineReader {
 		} catch (IOException e) {
 			throw new IOException("Error reading " + file.path() + " at line #" + lineNo, e);
 		}
+	}
 
+	public static String readString(FileHandle file) throws IOException {
+
+		StringBuilder builder = new StringBuilder((int) file.length());
+
+		readLines(file, line -> {
+
+			if (builder.length() > 0) {
+				builder.append('\n');
+			}
+
+			builder.append(line);
+		});
+
+		return builder.toString();
+	}
+
+	public static void writeString(FileHandle file, String text) throws IOException {
+
+		StringBuilder builder = new StringBuilder(text.length());
+		String newLine = Host.os != Host.OS.Windows ? "\n" : "\r\n";
+
+		try (BufferedReader reader = new BufferedReader(new StringReader(text))) {
+
+			String line;
+			while ((line = reader.readLine()) != null) {
+
+				if (builder.length() > 0) {
+					builder.append(newLine);
+				}
+
+				builder.append(line);
+			}
+		}
+
+		file.writeString(builder.toString(), false);
 	}
 
 }

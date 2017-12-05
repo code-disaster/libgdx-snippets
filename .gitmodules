@@ -1,3 +1,0 @@
-[submodule "deps/flextGL"]
-	path = deps/flextGL
-	url = https://github.com/code-disaster/flextGL.git

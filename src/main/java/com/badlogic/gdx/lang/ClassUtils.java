@@ -1,7 +1,7 @@
 package com.badlogic.gdx.lang;
 
 import com.badlogic.gdx.checksum.SHA1;
-import com.badlogic.gdx.utils.FileUtils;
+import com.badlogic.gdx.files.FileStreamReader;
 import com.badlogic.gdx.utils.GdxRuntimeException;
 
 import java.io.IOException;
@@ -42,12 +42,12 @@ public class ClassUtils {
 		String resourcePath = "/" + classType.getName().replace('.', '/') + ".class";
 		InputStream resource = classType.getResourceAsStream(resourcePath);
 
-		return FileUtils.hashStream(resource);
+		return FileStreamReader.hashStream(resource);
 	}
 
 	/**
 	 * Calculates the SHA-1 hash on the byte code (the .class file content) of the given {@link Class}.
-	 *
+	 * <p>
 	 * This version returns {@code defaultHash} if an {@link IOException} is thrown.
 	 */
 	public static SHA1 getClassHash(Class<?> classType, SHA1 defaultHash) {
