@@ -156,7 +156,7 @@ public class PixmapUtils {
 		int width = pixmap.getWidth();
 		int height = pixmap.getHeight();
 
-		int pitch = width * 4;
+		int pitch = width * getPixelStride(pixmap.getFormat());
 
 		ByteBuffer pixels = pixmap.getPixels();
 

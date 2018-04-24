@@ -320,7 +320,9 @@ public class MultiTargetFrameBuffer implements Disposable {
 		gl30.glPixelStorei(GL_PACK_ALIGNMENT, 1);
 
 		ByteBuffer pixels = target.getPixels();
-		gl30.glReadPixels(srcX0, srcY0, srcX1 - srcX0, srcY1 - srcY0, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
+
+		int glFormat = target.getGLFormat();
+		gl30.glReadPixels(srcX0, srcY0, srcX1 - srcX0, srcY1 - srcY0, glFormat, GL_UNSIGNED_BYTE, pixels);
 
 		gl30.glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
 		gl30.glReadBuffer(GL_BACK);
