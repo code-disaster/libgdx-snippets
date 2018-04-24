@@ -7,10 +7,51 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.Comparator;
 
 import static com.badlogic.gdx.utils.Host.OS.Linux;
 
 public final class FileUtils {
+
+	/**
+	 * Default comparator to sort {@link FileHandle}s:
+	 * - directories first
+	 * - then by name, case insensitive
+	 */
+	public static final Comparator<FileHandle> DEFAULT_COMPARATOR = (file1, file2) -> {
+
+		boolean d1 = file1.isDirectory();
+		boolean d2 = file2.isDirectory();
+
+		if (d1 != d2) {
+			return d1 ? -1 : 1;
+		}
+		
+		return file1.name().compareToIgnoreCase(file2.name());
+	};
+
+	/**
+	 * Wrapper to {@link FileHandle#list()} which also sorts the result.
+	 */
+	public static FileHandle[] list(FileHandle folder) {
+
+		FileHandle[] files = folder.list();
+		Arrays.sort(files, DEFAULT_COMPARATOR);
+
+		return files;
+	}
+
+	/**
+	 * Wrapper to {@link FileHandle#list(String)} which also sorts the result.
+	 */
+	public static FileHandle[] list(FileHandle folder, String suffix) {
+
+		FileHandle[] files = folder.list(suffix);
+		Arrays.sort(files, DEFAULT_COMPARATOR);
+
+		return files;
+	}
 
 	/**
 	 * Queries (and creates, if necessary) a path to store user files.
