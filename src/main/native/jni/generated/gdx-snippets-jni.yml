@@ -7,6 +7,8 @@ source-path   : "../../../java"
 class-path    : "../../../../../build/classes/main"
 
 includes :
-    - "**/gdx/graphics/*.java"
+    - "**/gdx/graphics/GL33Ext.java"
+    - "**/gdx/graphics/GLFWExt.java"
+    - "**/gdx/graphics/GLSLOptimizer.java"
     - "**/gdx/profiler/*.java"
     - "**/gdx/utils/*.java"
