@@ -2,7 +2,6 @@ package com.badlogic.gdx.utils;
 
 import com.badlogic.gdx.random.RandomNumbers;
 
-import javax.annotation.Nonnull;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -401,7 +400,7 @@ public class ArrayUtils {
 		}
 
 		@Override
-		public @Nonnull Iterator<T> iterator() {
+		public Iterator<T> iterator() {
 			return new ArrayIterator<>(array, size);
 		}
 
