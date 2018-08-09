@@ -128,9 +128,24 @@ public class PixmapRegion {
 		return height;
 	}
 
-	public TextureRegion getRegion(TextureRegion region) {
-		region.setRegion(x, y, width, height);
-		return region;
+	/**
+	 * Copies region UV data into {@link TextureRegion} instance.
+	 * <p>
+	 * Does <i>not</i> modify {@link TextureRegion#texture}.
+	 */
+	public void getRegion(TextureRegion region) {
+
+		float invTexWidth = 1.0f / pixmap.getWidth();
+		float invTexHeight = 1.0f / pixmap.getHeight();
+
+		region.u = x * invTexWidth;
+		region.u2 = (x + width) * invTexWidth;
+
+		region.v = y * invTexHeight;
+		region.v2 = (y + height) * invTexHeight;
+
+		region.regionWidth = width;
+		region.regionHeight = height;
 	}
 
 	public Pixmap.Format getFormat() {

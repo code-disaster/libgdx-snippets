@@ -1,8 +1,9 @@
 package com.badlogic.gdx.scenes.scene2d.ui;
 
+@SuppressWarnings("unused")
 public class ContainerLayout extends ActorLayout<Container> {
 
-	public ContainerLayout(){
+	public ContainerLayout() {
 		super(Container.class);
 	}
 

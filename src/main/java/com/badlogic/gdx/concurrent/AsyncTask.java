@@ -46,17 +46,14 @@ public class AsyncTask<V extends AsyncTaskJob<V>> {
 		return consumer.test(job);
 	}
 
-	@Deprecated
-	public boolean consumeJob(Consumer<V> consumer) {
+	public void consumeJob(Consumer<V> consumer) {
 
 		if (state.get() != State.READY) {
 			//throw new IllegalStateException("Invalid task state!");
-			return false;
+			return;
 		}
 
 		consumer.accept(job);
-
-		return true;
 	}
 
 	public boolean isReady() {
