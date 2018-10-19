@@ -149,6 +149,36 @@ public class PixmapUtils {
 	}
 
 	/**
+	 * Horizontally mirrors the {@link Pixmap} content, in place, line by line.
+	 */
+	public static void flipX(Pixmap pixmap) {
+
+		int width = pixmap.getWidth();
+		int height = pixmap.getHeight();
+
+		int bytesPerPixel = getPixelStride(pixmap.getFormat());
+		int pitch = width * bytesPerPixel;
+
+		ByteBuffer pixels = pixmap.getPixels();
+
+		byte[] buffer = new byte[pitch];
+
+		for (int y = 0; y < height; y++) {
+
+			pixels.position(y * pitch);
+			pixels.get(buffer, 0, pitch);
+
+			pixels.position(y * pitch);
+
+			for (int x = 0, offs = pitch - bytesPerPixel; x < width; x++, offs -= bytesPerPixel) {
+				pixels.put(buffer, offs, bytesPerPixel);
+			}
+		}
+
+		pixels.position(0);
+	}
+
+	/**
 	 * Vertically mirrors the {@link Pixmap} content, in place, line by line.
 	 */
 	public static void flipY(Pixmap pixmap) {

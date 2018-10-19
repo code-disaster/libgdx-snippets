@@ -150,6 +150,20 @@ public class PixmapTransform {
 		}
 	}
 
+	/**
+	 * mirror pixmap in-place, no-op for {@link Mirror#None}
+	 */
+	public static void mirror(Pixmap pixmap, Mirror mirror) {
+
+		if (mirror == Mirror.X || mirror == Mirror.XY) {
+			PixmapUtils.flipX(pixmap);
+		}
+
+		if (mirror == Mirror.Y || mirror == Mirror.XY) {
+			PixmapUtils.flipY(pixmap);
+		}
+	}
+
 	public static int getWidth(int width, int height, Rotate rotate) {
 		return (rotate.ordinal() & 0x1) == 1 ? height : width;
 	}
