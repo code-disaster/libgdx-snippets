@@ -113,7 +113,7 @@ public class ClassFinder {
 		FileHandle relative = relativeTo(file, root);
 
 		String className = relative.pathWithoutExtension()
-				.replace("/", ".").replaceAll("\\$.", "");
+				.replace("/", ".");//.replaceAll("\\$.", "");
 
 		processClass(className, filter, processor);
 	}

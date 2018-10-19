@@ -2,6 +2,7 @@
 fips/
 fips-glsl-optimizer/
 fips-jni/
+fips-remotery/
 
 # fips output
 fips-build/

@@ -7,7 +7,7 @@ import com.badlogic.gdx.utils.*;
 /**
  * Loads images from texture atlas, just like {@link TextureAtlas}, but stores them in pixmaps instead of textures
  * to avoid creation of texture resources.
- *
+ * <p>
  * Internally uses {@link com.badlogic.gdx.graphics.g2d.TextureAtlas.TextureAtlasData} to avoid code duplication.
  */
 public class PixmapAtlas implements Disposable {
@@ -20,19 +20,23 @@ public class PixmapAtlas implements Disposable {
 		this(packFile, packFile.parent(), false);
 	}
 
+	public PixmapAtlas(FileHandle packFile, PixmapReader reader) {
+		load(new TextureAtlas.TextureAtlasData(packFile, packFile.parent(), false), reader);
+	}
+
 	public PixmapAtlas(FileHandle packFile, FileHandle imagesDir, boolean flip) {
-		this(new TextureAtlas.TextureAtlasData(packFile, imagesDir, flip));
+		load(new TextureAtlas.TextureAtlasData(packFile, imagesDir, flip), DEFAULT_READER);
 	}
 
 	public PixmapAtlas(TextureAtlas.TextureAtlasData data) {
-		load(data);
+		load(data, DEFAULT_READER);
 	}
 
 	private PixmapAtlas() {
 
 	}
 
-	private void load(TextureAtlas.TextureAtlasData data) {
+	private void load(TextureAtlas.TextureAtlasData data, PixmapReader reader) {
 
 		ObjectMap<TextureAtlas.TextureAtlasData.Page, AtlasPage> pageToPixmap = new ObjectMap<>();
 
@@ -40,7 +44,7 @@ public class PixmapAtlas implements Disposable {
 
 			TextureAtlas.TextureAtlasData.Page page = data.pages.get(pageIndex);
 
-			Pixmap pixmap = new Pixmap(page.textureFile);
+			Pixmap pixmap = reader.read(page.textureFile, (int) page.width, (int) page.height);
 			pixmaps.add(pixmap);
 
 			AtlasPage atlasPage = new AtlasPage(pageIndex, page.textureFile, pixmap);
@@ -156,4 +160,13 @@ public class PixmapAtlas implements Disposable {
 			this.pixmap = pixmap;
 		}
 	}
+
+	@FunctionalInterface
+	public interface PixmapReader {
+
+		Pixmap read(FileHandle file, int width, int height);
+	}
+
+	private static PixmapReader DEFAULT_READER = (file, width, height) -> new Pixmap(file);
+
 }

@@ -9,10 +9,21 @@ public class Host {
 		Unknown
 	}
 
+	public enum OSVersion {
+		Windows7,
+		Unspecified
+	}
+
 	/**
 	 * Stores type of the host operating system.
 	 */
 	public static final OS os = getHostOS();
+
+	/**
+	 * I know this is a terrible idea, but we use this identifier for some workarounds
+	 * specific to Windows 7.
+	 */
+	public static final OSVersion version = getHostOSVersion();
 
 	private static OS getHostOS() {
 
@@ -28,6 +39,18 @@ public class Host {
 		}
 
 		return os;
+	}
+
+	private static OSVersion getHostOSVersion() {
+
+		OSVersion version = OSVersion.Unspecified;
+		String osName = System.getProperty("os.name");
+
+		if (osName.contains("Windows 7")) {
+			version = OSVersion.Windows7;
+		}
+
+		return version;
 	}
 
 }
