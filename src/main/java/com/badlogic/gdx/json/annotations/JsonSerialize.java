@@ -37,5 +37,7 @@ public @interface JsonSerialize {
 	float defaultFloatValue() default 0.0f;
 
 	double defaultDoubleValue() default 0.0;
+
+	boolean defaultBooleanValue() default false;
 	
 }

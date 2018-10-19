@@ -3,12 +3,14 @@ package com.badlogic.gdx.json;
 import com.badlogic.gdx.json.annotations.JsonMap;
 import com.badlogic.gdx.utils.*;
 
+import java.util.Iterator;
 import java.util.Map;
-import java.util.function.*;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 /**
  * Implementation of {@link com.badlogic.gdx.utils.Json.Serializer} to serialize {@link Map} containers.
- *
+ * <p>
  * This is used internally by {@link AnnotatedJsonSerializer}.
  */
 class JsonMapSerializer<K, V> implements Json.Serializer<Iterable<?>> {
@@ -29,9 +31,13 @@ class JsonMapSerializer<K, V> implements Json.Serializer<Iterable<?>> {
 	public <E> void write(Json json, Iterable<E> entries,
 						  Function<E, ?> getKey, Function<E, ?> getValue) {
 
+		Iterator<E> it = entries.iterator();
+
 		json.writeArrayStart(name);
 
-		entries.forEach(entry -> {
+		while (it.hasNext()) {
+
+			E entry = it.next();
 
 			json.writeObjectStart();
 
@@ -39,8 +45,7 @@ class JsonMapSerializer<K, V> implements Json.Serializer<Iterable<?>> {
 			json.writeValue("value", getValue.apply(entry), map.value());
 
 			json.writeObjectEnd();
-
-		});
+		}
 
 		json.writeArrayEnd();
 	}
@@ -80,6 +85,7 @@ class JsonMapSerializer<K, V> implements Json.Serializer<Iterable<?>> {
 	}
 
 	interface KeyValueConsumer<M, K, V> {
+
 		void accept(M map, K key, V value);
 	}
 

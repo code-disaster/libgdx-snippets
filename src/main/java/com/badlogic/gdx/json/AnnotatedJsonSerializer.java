@@ -65,7 +65,7 @@ public class AnnotatedJsonSerializer<T> implements Json.Serializer<T> {
 	private JsonSerializable annotation;
 	private Array<FieldAdapter> fieldAdapters = new Array<>();
 
-	public AnnotatedJsonSerializer(Json json, Class<T> clazz) {
+	AnnotatedJsonSerializer(Json json, Class<T> clazz) {
 		this.clazz = clazz;
 		createSerializer(json);
 	}
@@ -140,7 +140,10 @@ public class AnnotatedJsonSerializer<T> implements Json.Serializer<T> {
 			}
 
 			if (fieldType.isArray()) {
-				json.writeValue(accessible.getName(), value, fieldType, fieldType.getComponentType());
+				int arrayLen = java.lang.reflect.Array.getLength(value);
+				if (arrayLen > 0) {
+					json.writeValue(accessible.getName(), value, fieldType, fieldType.getComponentType());
+				}
 			} else {
 				if (fieldType.equals(int.class)) {
 					int i = (int) value;
@@ -165,6 +168,11 @@ public class AnnotatedJsonSerializer<T> implements Json.Serializer<T> {
 							json.writeValue(accessible.getName(), d, fieldType);
 						}
 					}
+				} else if (fieldType.equals(boolean.class)) {
+					boolean b = (boolean) value;
+					if (accessible.annotation.writeIfDefaultValue() || b != accessible.annotation.defaultBooleanValue()) {
+						json.writeValue(accessible.getName(), value, fieldType);
+					}
 				} else {
 					json.writeValue(accessible.getName(), value, fieldType);
 				}
@@ -179,11 +187,13 @@ public class AnnotatedJsonSerializer<T> implements Json.Serializer<T> {
 			Array<?> array = accessible.get(object);
 
 			if (array != null) {
-				JsonArraySerializer<?> serializer = (JsonArraySerializer<?>) accessible.serializer;
-				serializer.write(json, array, Array.class);
+				if (array.size > 0) {
+					JsonArraySerializer<?> serializer = (JsonArraySerializer<?>) accessible.serializer;
+					serializer.write(json, array, Array.class);
+				}
 			} else {
 				if (annotation.writeNull()) {
-					json.writeValue(accessible.getName(), Array.class.cast(null), Array.class);
+					json.writeValue(accessible.getName(), (Array) null, Array.class);
 				}
 			}
 
@@ -204,10 +214,12 @@ public class AnnotatedJsonSerializer<T> implements Json.Serializer<T> {
 				Map<?, ?> value = accessible.get(object);
 
 				if (value != null) {
-					serializer.write(json, value.entrySet(), Map.Entry::getKey, Map.Entry::getValue);
+					if (value.size() > 0) {
+						serializer.write(json, value.entrySet(), Map.Entry::getKey, Map.Entry::getValue);
+					}
 				} else {
 					if (annotation.writeNull()) {
-						json.writeValue(accessible.getName(), Map.class.cast(null), Map.class);
+						json.writeValue(accessible.getName(), (Map) null, Map.class);
 					}
 				}
 
@@ -216,10 +228,12 @@ public class AnnotatedJsonSerializer<T> implements Json.Serializer<T> {
 				ObjectMap<?, ?> value = accessible.get(object);
 
 				if (value != null) {
-					serializer.write(json, value.entries(), e -> e.key, e -> e.value);
+					if (value.size > 0) {
+						serializer.write(json, value.entries(), e -> e.key, e -> e.value);
+					}
 				} else {
 					if (annotation.writeNull()) {
-						json.writeValue(accessible.getName(), ObjectMap.class.cast(null), ObjectMap.class);
+						json.writeValue(accessible.getName(), (ObjectMap) null, ObjectMap.class);
 					}
 				}
 
@@ -262,7 +276,7 @@ public class AnnotatedJsonSerializer<T> implements Json.Serializer<T> {
 
 				Json.Serializer<T> serializer = json.getSerializer(clazz);
 
-				if (serializer == null || !(serializer instanceof AnnotatedJsonSerializer)) {
+				if (!(serializer instanceof AnnotatedJsonSerializer)) {
 					throw new GdxRuntimeException("No annotated serializer found for subclass " + clazz.getName());
 				}
 
@@ -409,10 +423,16 @@ public class AnnotatedJsonSerializer<T> implements Json.Serializer<T> {
 
 			if (Map.class.isAssignableFrom(clazz)) {
 				Map<?, ?> value = serializer.read(json, jsonData);
-				accessible.set(object, value);
+				Map<?, ?> oldValue = accessible.get(object);
+				if (!(oldValue != null && oldValue.size() == 0 && value.size() == 0)) {
+					accessible.set(object, value);
+				}
 			} else if (ObjectMap.class.isAssignableFrom(clazz)) {
 				ObjectMap<?, ?> value = serializer.read(json, jsonData, ObjectMap::new, ObjectMap::put);
-				accessible.set(object, value);
+				ObjectMap<?, ?> oldValue = accessible.get(object);
+				if (!(oldValue != null && oldValue.size == 0 && value.size == 0)) {
+					accessible.set(object, value);
+				}
 			}
 
 		});
@@ -439,44 +459,37 @@ public class AnnotatedJsonSerializer<T> implements Json.Serializer<T> {
 	}
 
 	private Annotation findAnnotation(Class clazz, Class<? extends java.lang.annotation.Annotation> annotation) {
+
+		// check class (or interface)
 		if (ClassReflection.isAnnotationPresent(clazz, annotation)) {
 			return ClassReflection.getAnnotation(clazz, annotation);
 		}
 
-		// We loop through any interfaces and check manually for annotations as they are not inherited
+		// check interfaces - they do not inherit annotations
 		Class[] interfaces = ClassReflection.getInterfaces(clazz);
-		for (Class aInterface : interfaces) {
-			if (ClassReflection.isAnnotationPresent(aInterface, annotation)) {
-				return ClassReflection.getAnnotation(aInterface, annotation);
-			} else {
-				return findAnnotation(aInterface, annotation);
+		for (Class cif : interfaces) {
+			Annotation cifAnnotation = findAnnotation(cif, annotation);
+			if (cifAnnotation != null) {
+				return cifAnnotation;
 			}
 		}
-		// Finally we do the same for any of it's superclasses
-		if (clazz != Object.class && clazz.getSuperclass() != Object.class)
-			return findAnnotation(clazz.getSuperclass(), annotation);
 
-		return null;
+		// check superclass
+		clazz = clazz.getSuperclass();
+		return clazz == null ? null : findAnnotation(clazz, annotation);
 	}
 
-
 	private void createSerializerFields(Json json, Class<?> clazz) {
-
-		if (clazz == null) {
-			return;
-		}
-
-		// This seems like it could be cached, since we know there will be an annotation
-		if (findAnnotation(clazz, JsonSerializable.class) == null) {
-			return;
-		}
 
 		// declared fields of this class
 		Field[] fields = ClassReflection.getDeclaredFields(clazz);
 		createSerializerFields(json, fields);
 
-		// continue with super class
-		createSerializerFields(json, clazz.getSuperclass());
+		// continue with super class, if annotated
+		clazz = clazz.getSuperclass();
+		if (clazz != null && findAnnotation(clazz, JsonSerializable.class) != null) {
+			createSerializerFields(json, clazz);
+		}
 	}
 
 	private void createSerializerFields(Json json, Field[] fields) {

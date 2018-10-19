@@ -5,8 +5,11 @@ import com.badlogic.gdx.lang.ClassFinder;
 import com.badlogic.gdx.utils.*;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 
 /**
  * Utility functions to read or write a hierarchy of objects annotated with
@@ -35,7 +38,21 @@ public class AnnotatedJson {
 		try {
 			InputStream fileStream = path.read();
 			BufferedInputStream stream = new BufferedInputStream(fileStream);
-			Reader reader = new InputStreamReader(stream, "UTF-8");
+			Reader reader = new InputStreamReader(stream, StandardCharsets.UTF_8);
+			return json.fromJson(clazz, reader);
+		} catch (SerializationException e) {
+			GdxSnippets.log.error("Error while serializing class " + clazz.getName(), e);
+			throw new IOException(e.getCause());
+		} catch (RuntimeException e) {
+			throw new IOException(e);
+		}
+	}
+
+	public static <T> T readGZip(FileHandle path, Class<T> clazz, Json json) throws IOException {
+		try {
+			InputStream fileStream = path.read();
+			InputStream stream = new GZIPInputStream(fileStream);
+			Reader reader = new InputStreamReader(stream, StandardCharsets.UTF_8);
 			return json.fromJson(clazz, reader);
 		} catch (SerializationException e) {
 			GdxSnippets.log.error("Error while serializing class " + clazz.getName(), e);
@@ -77,7 +94,20 @@ public class AnnotatedJson {
 		String prettyOutput = compact ? output : json.prettyPrint(output);
 
 		try (FileOutputStream fos = new FileOutputStream(path.file(), false)) {
-			try (Writer writer = new OutputStreamWriter(fos, "UTF-8")) {
+			try (Writer writer = new OutputStreamWriter(fos, StandardCharsets.UTF_8)) {
+				writer.write(prettyOutput);
+				writer.flush();
+			}
+		}
+	}
+
+	public static <T> void writeGZip(FileHandle path, boolean compact, T object, Json json) throws IOException {
+
+		String output = json.toJson(object);
+		String prettyOutput = compact ? output : json.prettyPrint(output);
+
+		try (OutputStream gzip = new GZIPOutputStream(new FileOutputStream(path.file(), false), true)) {
+			try (Writer writer = new OutputStreamWriter(gzip, StandardCharsets.UTF_8)) {
 				writer.write(prettyOutput);
 				writer.flush();
 			}
@@ -111,13 +141,48 @@ public class AnnotatedJson {
 
 		new ClassFinder()
 				.filterURLforClass(clazz)
-				.process(clazzNameFilter::test, aClazz -> {
+				.process(clazzNameFilter, aClazz -> {
 					if (!clazz.equals(aClazz) && clazz.isAssignableFrom(aClazz)) {
-						//System.out.println("register: " + aClazz.getName());
 						register(json, aClazz.asSubclass(clazz));
 					}
 				});
+	}
 
+	public static <T> void enumerateAllClasses(Array<String> allClassNames,
+											   Class<T> referenceClass,
+											   Predicate<String> classNameFilter) {
+
+		new ClassFinder()
+				.filterURLforClass(referenceClass)
+				.process(
+						name -> {
+							if (classNameFilter.test(name)) {
+								allClassNames.add(name);
+							}
+							return false;
+						},
+						clazz -> {
+						});
+	}
+
+	public static <T> void registerSubclasses(Json json, Class<T> clazz,
+											  Array<String> allClassNames,
+											  Predicate<String> classNameFilter) {
+
+		Predicate<String> filter = classNameFilter != null ? classNameFilter : (name -> true);
+
+		allClassNames.forEach(name -> {
+			if (filter.test(name)) {
+				try {
+					Class<?> aClazz = Class.forName(name);
+					if (!clazz.equals(aClazz) && clazz.isAssignableFrom(aClazz)) {
+						register(json, aClazz.asSubclass(clazz));
+					}
+				} catch (ClassNotFoundException ignored) {
+
+				}
+			}
+		});
 	}
 
 }
