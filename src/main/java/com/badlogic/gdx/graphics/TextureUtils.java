@@ -1,9 +1,8 @@
 package com.badlogic.gdx.graphics;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.function.Consumer;
 import com.badlogic.gdx.utils.Array;
-
-import java.util.function.Consumer;
 
 public class TextureUtils {
 

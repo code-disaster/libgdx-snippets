@@ -1,7 +1,8 @@
 package com.badlogic.gdx.lang;
 
+import com.badlogic.gdx.function.Consumer;
+
 import java.lang.reflect.Array;
-import java.util.function.Consumer;
 
 /**
  * Utility class to box typed values. Can be used to capture non-final

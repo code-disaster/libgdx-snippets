@@ -1,8 +1,7 @@
 package com.badlogic.gdx.graphics.glutils;
 
+import com.badlogic.gdx.function.Consumer;
 import com.badlogic.gdx.utils.Disposable;
-
-import java.util.function.Consumer;
 
 /**
  * Extension to {@link ShaderProgram} for customized shader construction. The "onCreate" consumer function

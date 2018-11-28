@@ -1,9 +1,10 @@
 package com.badlogic.gdx.concurrent;
 
+import com.badlogic.gdx.function.Consumer;
+import com.badlogic.gdx.function.Supplier;
+
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
-import java.util.function.Consumer;
-import java.util.function.Supplier;
 
 /**
  * A functional style wrapper to {@link java.util.concurrent.locks.ReentrantLock}.

@@ -1,13 +1,13 @@
 package com.badlogic.gdx.json;
 
 import com.badlogic.gdx.files.FileHandle;
+import com.badlogic.gdx.function.Predicate;
+import com.badlogic.gdx.function.*;
 import com.badlogic.gdx.lang.ClassFinder;
 import com.badlogic.gdx.utils.*;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
-import java.util.function.Consumer;
-import java.util.function.Predicate;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
@@ -171,7 +171,7 @@ public class AnnotatedJson {
 
 		Predicate<String> filter = classNameFilter != null ? classNameFilter : (name -> true);
 
-		allClassNames.forEach(name -> {
+		Iterables.forEach(allClassNames, name -> {
 			if (filter.test(name)) {
 				try {
 					Class<?> aClazz = Class.forName(name);

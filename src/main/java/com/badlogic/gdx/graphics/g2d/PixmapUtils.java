@@ -1,11 +1,11 @@
 package com.badlogic.gdx.graphics.g2d;
 
+import com.badlogic.gdx.function.IntPredicate;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.math.MathUtils;
 
 import java.nio.ByteBuffer;
-import java.util.function.IntPredicate;
 
 import static com.badlogic.gdx.graphics.Pixmap.*;
 

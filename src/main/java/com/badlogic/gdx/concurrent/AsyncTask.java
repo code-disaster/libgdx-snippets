@@ -1,9 +1,10 @@
 package com.badlogic.gdx.concurrent;
 
+import com.badlogic.gdx.function.Consumer;
+import com.badlogic.gdx.function.Predicate;
+
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Consumer;
-import java.util.function.Predicate;
 
 /**
  * A reentrant wrapper to {@link FutureTask}, with some additional properties to synchronize its result with the

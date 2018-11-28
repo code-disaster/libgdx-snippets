@@ -1,6 +1,7 @@
 package com.badlogic.gdx.graphics.g2d;
 
 import com.badlogic.gdx.files.FileHandle;
+import com.badlogic.gdx.function.Iterables;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.utils.*;
 
@@ -78,7 +79,7 @@ public class PixmapAtlas implements Disposable {
 
 	@Override
 	public void dispose() {
-		pixmaps.forEach(Pixmap::dispose);
+		Iterables.forEach(pixmaps, Pixmap::dispose);
 		pixmaps.clear();
 		pages.clear();
 		regions.clear();

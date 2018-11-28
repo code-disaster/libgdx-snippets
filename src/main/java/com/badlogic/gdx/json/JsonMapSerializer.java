@@ -1,12 +1,12 @@
 package com.badlogic.gdx.json;
 
+import com.badlogic.gdx.function.Function;
 import com.badlogic.gdx.json.annotations.JsonMap;
 import com.badlogic.gdx.utils.*;
 
 import java.util.Iterator;
 import java.util.Map;
-import java.util.function.Function;
-import java.util.function.Supplier;
+import com.badlogic.gdx.function.Supplier;
 
 /**
  * Implementation of {@link com.badlogic.gdx.utils.Json.Serializer} to serialize {@link Map} containers.

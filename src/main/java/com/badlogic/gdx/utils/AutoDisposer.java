@@ -1,8 +1,7 @@
 package com.badlogic.gdx.utils;
 
-import com.badlogic.gdx.utils.reflect.ClassReflection;
-import com.badlogic.gdx.utils.reflect.Field;
-import com.badlogic.gdx.utils.reflect.ReflectionException;
+import com.badlogic.gdx.function.Iterables;
+import com.badlogic.gdx.utils.reflect.*;
 
 import java.lang.reflect.Array;
 
@@ -111,7 +110,7 @@ public class AutoDisposer {
 
 		if (ClassReflection.isAssignableFrom(Iterable.class, type)) {
 			Iterable<?> iterable = (Iterable<?>) object;
-			iterable.forEach(AutoDisposer::dispose);
+			Iterables.forEach(iterable, AutoDisposer::dispose);
 		}
 	}
 

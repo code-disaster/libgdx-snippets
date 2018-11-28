@@ -1,6 +1,6 @@
 package com.badlogic.gdx.profiler;
 
-import java.util.function.Consumer;
+import com.badlogic.gdx.function.Consumer;
 
 /**
  * Simple functional interface to scope (wrap begin/end) sample calls.

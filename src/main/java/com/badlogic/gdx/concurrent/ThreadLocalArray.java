@@ -1,10 +1,9 @@
 package com.badlogic.gdx.concurrent;
 
+import com.badlogic.gdx.function.Supplier;
 import com.badlogic.gdx.function.ThrowableSupplier;
 import com.badlogic.gdx.utils.GdxRuntimeException;
 import com.badlogic.gdx.utils.reflect.*;
-
-import java.util.function.Supplier;
 
 /**
  * A convenience wrapper to {@link ThreadLocal} storing an array of objects.

@@ -1,10 +1,10 @@
 package com.badlogic.gdx.utils;
 
+import com.badlogic.gdx.function.Consumer;
+import com.badlogic.gdx.function.Predicate;
 import com.badlogic.gdx.random.RandomNumbers;
 
 import java.util.*;
-import java.util.function.Consumer;
-import java.util.function.Predicate;
 
 /**
  * Array utility functions.

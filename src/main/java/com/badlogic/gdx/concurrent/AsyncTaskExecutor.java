@@ -26,6 +26,13 @@ public class AsyncTaskExecutor implements Disposable {
 		task.execute(service);
 	}
 
+	/**
+	 * fire & forget - no synchronization with main thread is done
+	 */
+	public void executeJob(Runnable job) {
+		service.execute(job);
+	}
+
 	@Override
 	public void dispose() {
 

@@ -1,11 +1,11 @@
 package com.badlogic.gdx.json;
 
+import com.badlogic.gdx.function.Consumer;
 import com.badlogic.gdx.json.annotations.*;
 import com.badlogic.gdx.utils.*;
 import com.badlogic.gdx.utils.reflect.*;
 
 import java.util.Map;
-import java.util.function.Consumer;
 
 /**
  * Generic implementation of {@link com.badlogic.gdx.utils.Json.Serializer} which uses reflection information

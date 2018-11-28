@@ -1,6 +1,8 @@
 package com.badlogic.gdx.lang;
 
 import com.badlogic.gdx.files.FileHandle;
+import com.badlogic.gdx.function.Consumer;
+import com.badlogic.gdx.function.Predicate;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.GdxRuntimeException;
 
@@ -11,8 +13,6 @@ import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Enumeration;
-import java.util.function.Consumer;
-import java.util.function.Predicate;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
