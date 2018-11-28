@@ -48,11 +48,38 @@ public class AnnotatedJson {
 		}
 	}
 
+	public static <T> T read(byte[] bytes, Class<T> clazz, Json json) throws IOException {
+		try {
+			InputStream bais = new ByteArrayInputStream(bytes);
+			Reader reader = new InputStreamReader(bais, StandardCharsets.UTF_8);
+			return json.fromJson(clazz, reader);
+		} catch (SerializationException e) {
+			GdxSnippets.log.error("Error while serializing class " + clazz.getName(), e);
+			throw new IOException(e.getCause());
+		} catch (RuntimeException e) {
+			throw new IOException(e);
+		}
+	}
+
 	public static <T> T readGZip(FileHandle path, Class<T> clazz, Json json) throws IOException {
 		try {
 			InputStream fileStream = path.read();
 			InputStream stream = new GZIPInputStream(fileStream);
 			Reader reader = new InputStreamReader(stream, StandardCharsets.UTF_8);
+			return json.fromJson(clazz, reader);
+		} catch (SerializationException e) {
+			GdxSnippets.log.error("Error while serializing class " + clazz.getName(), e);
+			throw new IOException(e.getCause());
+		} catch (RuntimeException e) {
+			throw new IOException(e);
+		}
+	}
+
+	public static <T> T readGZip(byte[] bytes, Class<T> clazz, Json json) throws IOException {
+		try {
+			InputStream bais = new ByteArrayInputStream(bytes);
+			InputStream gzip = new GZIPInputStream(bais);
+			Reader reader = new InputStreamReader(gzip, StandardCharsets.UTF_8);
 			return json.fromJson(clazz, reader);
 		} catch (SerializationException e) {
 			GdxSnippets.log.error("Error while serializing class " + clazz.getName(), e);
@@ -101,6 +128,16 @@ public class AnnotatedJson {
 		}
 	}
 
+	public static <T> byte[] write(T object, Json json) throws IOException {
+
+		ByteArrayOutputStream baos = new ByteArrayOutputStream(65536);
+
+		try (Writer writer = new OutputStreamWriter(baos, StandardCharsets.UTF_8)) {
+			json.toJson(object, writer);
+			return baos.toByteArray();
+		}
+	}
+
 	public static <T> void writeGZip(FileHandle path, boolean compact, T object, Json json) throws IOException {
 
 		String output = json.toJson(object);
@@ -110,6 +147,18 @@ public class AnnotatedJson {
 			try (Writer writer = new OutputStreamWriter(gzip, StandardCharsets.UTF_8)) {
 				writer.write(prettyOutput);
 				writer.flush();
+			}
+		}
+	}
+
+	public static <T> byte[] writeGZip(T object, Json json) throws IOException {
+
+		ByteArrayOutputStream baos = new ByteArrayOutputStream(65536);
+
+		try (OutputStream gzip = new GZIPOutputStream(baos, true)) {
+			try (Writer writer = new OutputStreamWriter(gzip, StandardCharsets.UTF_8)) {
+				json.toJson(object, writer);
+				return baos.toByteArray();
 			}
 		}
 	}
