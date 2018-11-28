@@ -25,12 +25,12 @@ This means that changes done are pretty much instantly tested in our production 
 
 ## Highlights
 
+> 2018-Nov-28: I removed the native interfaces to __GLSL Optimizer__ and __Remotery__. GLSL Optimizer didn't have any noticeable performance impact for our use cases, and isn't applicable to many of our shaders (GLSL > 150). The Remotery wrapper has been replaced by the more complete and well-maintained LWJGL Remotery bindings.
+
 - [AnnotatedJson](https://github.com/code-disaster/libgdx-snippets/blob/master/src/main/java/com/badlogic/gdx/json/AnnotatedJson.java): custom JSON serializer, based on libGDX' Json classes, which allows annotation-driven serialization of object hierarchies.
 - [AutoDisposer](https://github.com/code-disaster/libgdx-snippets/blob/master/src/main/java/com/badlogic/gdx/utils/AutoDisposer.java): annotation-driven, semi-automatic disposal of disposable object hierarchies.
 - [GL33Ext](https://github.com/code-disaster/libgdx-snippets/blob/master/src/main/java/com/badlogic/gdx/graphics/GL33Ext.java): native interface to [flextGL](https://github.com/code-disaster/flextGL.git) to expose desktop OpenGL functions not made available by libGDX/LWJGL.
-- [GLSLOptimizer](https://github.com/code-disaster/libgdx-snippets/blob/master/src/main/java/com/badlogic/gdx/graphics/GLSLOptimizer.java): native interface to [glsl-optimizer](https://github.com/aras-p/glsl-optimizer.git).
 - [MultiTargetFrameBuffer](https://github.com/code-disaster/libgdx-snippets/blob/master/src/main/java/com/badlogic/gdx/graphics/glutils/MultiTargetFrameBuffer.java): custom GLFrameBuffer implementation for creating multi-render targets, e.g. usable for deferred rendering (G-buffers).
-- [Remotery](https://github.com/code-disaster/libgdx-snippets/blob/master/src/main/java/com/badlogic/gdx/profiler/Remotery.java): native interface to [Remotery](https://github.com/Celtoys/Remotery), a realtime profiler with web browser viewer.
 
 ## Usage
 
@@ -40,7 +40,9 @@ To use the native interfaces, you just need to add a call to ```GdxSnippetsNativ
 public class MyGdxGameAdapter extends ApplicationAdapter {
     @Override
     public void create() {
-        GdxSnippetsNativesLoader.load();
+        GdxSnippetsNativesLoader.load(
+            true /* load native library */,
+            true /* setup GL function bindings using flextGL *);
     }
 }
 ```
@@ -83,8 +85,8 @@ The steps below should work on every target system. You only need to specify a d
 # [optional] list all configs known to fips
 > ./fips list configs
 
-# e.g. for Windows 64 bit, using VS2013
-> ./fips set config win64-vs2013-release
+# e.g. for Windows 64 bit, using VS2017
+> ./fips set config win64-vs2017-release
 
 # or, for OS X, using XCode
 > ./fips set config osx-xcode-release
@@ -106,7 +108,7 @@ The steps below should work on every target system. You only need to specify a d
 
 ```shell
 # e.g. for Windows 64 bit
-> mvn install -Pwin64-vs2013
+> mvn install -Pwin64-vs2017
 
 # or, for OS X
 > mvn install -Posx-xcode
