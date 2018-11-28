@@ -19,4 +19,8 @@ public interface Profiler {
 		consumer.accept(context);
 	}
 
+	default void setThreadName(CharSequence name) {
+
+	}
+
 }
