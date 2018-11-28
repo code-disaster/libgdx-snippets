@@ -13,7 +13,7 @@ import java.util.regex.Pattern;
  */
 public class JsonFloatSerializer {
 
-	private static final String fpRegEx = "(-?[0-9\\.]+(E[+-][0-9]+)?)";
+	private static final String fpRegEx = "(-?[0-9.]+(E[+-][0-9]+)?)";
 	private static final Pattern purePattern = Pattern.compile("^" + fpRegEx + "$");
 	private static final Pattern ieeePattern = Pattern.compile("^0x([a-fA-F0-9]+)\\|" + fpRegEx + "$");
 

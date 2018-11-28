@@ -18,13 +18,18 @@ public class AnnotatedJsonSerializer<T> implements Json.Serializer<T> {
 
 	private static class FieldAdapter {
 
-		Field field;
-		JsonSerialize annotation;
+		final Field field;
+		final JsonSerialize annotation;
+		final boolean isArray;
+		final boolean isMap;
+
 		Json.Serializer<?> serializer;
 
 		FieldAdapter(Field field) {
 			this.field = field;
 			annotation = field.getDeclaredAnnotation(JsonSerialize.class).getAnnotation(JsonSerialize.class);
+			isArray = annotation.array().length > 0;
+			isMap = annotation.map().length > 0;
 		}
 
 		void ensureAccess(Consumer<FieldAdapter> consumer) {
@@ -61,9 +66,10 @@ public class AnnotatedJsonSerializer<T> implements Json.Serializer<T> {
 
 	}
 
-	private Class<T> clazz;
+	private final Class<T> clazz;
 	private JsonSerializable annotation;
-	private Array<FieldAdapter> fieldAdapters = new Array<>();
+	private final Array<FieldAdapter> fieldAdapters = new Array<>();
+	private final IntMap<Constructor> constructors = new IntMap<>(0);
 
 	AnnotatedJsonSerializer(Json json, Class<T> clazz) {
 		this.clazz = clazz;
@@ -318,7 +324,12 @@ public class AnnotatedJsonSerializer<T> implements Json.Serializer<T> {
 	@SuppressWarnings("unchecked")
 	private T createObjectInstance(Class<T> clazz) throws ReflectionException {
 
-		Constructor constructor = ClassReflection.getDeclaredConstructor(clazz);
+		int hash = clazz.hashCode();
+		Constructor constructor = constructors.get(hash);
+		if (constructor == null) {
+			constructor = ClassReflection.getDeclaredConstructor(clazz);
+			constructors.put(hash, constructor);
+		}
 		boolean isConstructorPublic = constructor.isAccessible();
 
 		if (!isConstructorPublic) {
@@ -594,10 +605,10 @@ public class AnnotatedJsonSerializer<T> implements Json.Serializer<T> {
 	}
 
 	private boolean isArray(FieldAdapter adapter) {
-		return adapter.annotation.array().length > 0;
+		return adapter.isArray;
 	}
 
 	private boolean isMap(FieldAdapter adapter) {
-		return adapter.annotation.map().length > 0;
+		return adapter.isMap;
 	}
 }
