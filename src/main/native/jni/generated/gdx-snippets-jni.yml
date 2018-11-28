@@ -4,11 +4,8 @@ source-path   : "../../../java"
 #class-path    : "../../../../../target/classes"
 
 # Gradle build path
-class-path    : "../../../../../build/classes/main"
+class-path    : "../../../../../build/classes/java/main"
 
 includes :
     - "**/gdx/graphics/GL33Ext.java"
-    - "**/gdx/graphics/GLFWExt.java"
-    - "**/gdx/graphics/GLSLOptimizer.java"
-    - "**/gdx/profiler/*.java"
     - "**/gdx/utils/*.java"
