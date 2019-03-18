@@ -15,6 +15,11 @@ public final class RandomNumbers {
 			}
 
 			@Override
+			public void seed(long s0, long s1) {
+				generator.setState(s0, s1);
+			}
+
+			@Override
 			public void getSeed(long[] seed) {
 				seed[0] = generator.getState(0);
 				seed[1] = generator.getState(1);
@@ -34,6 +39,9 @@ public final class RandomNumbers {
 		return (int) nextLongExclusive(n + 1);
 	}
 
+	/**
+	 * @return random number between start and end (including end value)
+	 */
 	public int nextInt(int start, int end) {
 		return start + nextInt(end - start);
 	}
@@ -96,6 +104,10 @@ public final class RandomNumbers {
 	public <T extends Enum<T>> T nextEnum(Class<T> enumType) {
 		T[] values = enumType.getEnumConstants();
 		return values[nextInt(values.length - 1)];
+	}
+
+	public void seed(long s0, long s1) {
+		generator.seed(s0, s1);
 	}
 
 	public void getSeed(long[] seed) {
