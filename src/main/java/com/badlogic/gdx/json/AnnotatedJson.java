@@ -181,6 +181,7 @@ public class AnnotatedJson {
 	 * Scans for subclasses of the given class, and adds annotated serializers for each
 	 * of them. Only classes located the same URL as the given class are searched.
 	 */
+	@Deprecated
 	public static <T> void registerSubclasses(Json json, Class<T> clazz,
 											  Predicate<String> clazzNameFilter) {
 
@@ -220,7 +221,10 @@ public class AnnotatedJson {
 
 		Predicate<String> filter = classNameFilter != null ? classNameFilter : (name -> true);
 
-		Iterables.forEach(allClassNames, name -> {
+		for (int i = 0; i < allClassNames.size; i++) {
+
+			String name = allClassNames.get(i);
+
 			if (filter.test(name)) {
 				try {
 					Class<?> aClazz = Class.forName(name);
@@ -231,7 +235,7 @@ public class AnnotatedJson {
 
 				}
 			}
-		});
+		}
 	}
 
 }

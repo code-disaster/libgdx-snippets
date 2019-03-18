@@ -88,6 +88,27 @@ public class ClassFinder {
 		return this;
 	}
 
+	/**
+	 * Iterates classes from a {@link ClassFinderCache}.
+	 * <p>
+	 * This is faster than walking URLs/directories. It's also more secure/portable.
+	 */
+	public ClassFinder process(ClassFinderCache cache, String groupName,
+							   Predicate<String> filter, Consumer<Class<?>> processor) {
+
+		Array<String> classNames = cache.get(groupName);
+
+		if (classNames == null) {
+			return this;
+		}
+
+		for (String className : classNames) {
+			processClass(className, filter, processor);
+		}
+
+		return this;
+	}
+
 	private void processDirectory(FileHandle root, FileHandle directory,
 								  Predicate<String> filter, Consumer<Class<?>> processor) {
 
