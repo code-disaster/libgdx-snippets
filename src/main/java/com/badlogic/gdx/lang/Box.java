@@ -1,5 +1,6 @@
 package com.badlogic.gdx.lang;
 
+import com.badlogic.gdx.concurrent.ThreadLocalInstance;
 import com.badlogic.gdx.function.Consumer;
 
 import java.lang.reflect.Array;
@@ -193,13 +194,13 @@ public final class Box {
 	}
 
 	private static final ThreadLocal<BorrowChecker<Boolean>> tlsBoolean =
-			ThreadLocal.withInitial(() -> new BorrowChecker<>(Boolean.class));
+			new ThreadLocalInstance<>(() -> new BorrowChecker<>(Boolean.class));
 
 	private static final ThreadLocal<BorrowChecker<Integer>> tlsInteger =
-			ThreadLocal.withInitial(() -> new BorrowChecker<>(Integer.class));
+			new ThreadLocalInstance<>(() -> new BorrowChecker<>(Integer.class));
 
 	private static final ThreadLocal<BorrowChecker<Float>> tlsFloat =
-			ThreadLocal.withInitial(() -> new BorrowChecker<>(Float.class));
+			new ThreadLocalInstance<>(() -> new BorrowChecker<>(Float.class));
 
 	public static Boolean borrowBoolean() {
 		return tlsBoolean.get().borrow().reference();

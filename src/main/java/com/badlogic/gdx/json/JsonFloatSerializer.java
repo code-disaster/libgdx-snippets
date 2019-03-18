@@ -1,5 +1,6 @@
 package com.badlogic.gdx.json;
 
+import com.badlogic.gdx.concurrent.ThreadLocalInstance;
 import com.badlogic.gdx.utils.GdxRuntimeException;
 import com.badlogic.gdx.utils.StringBuilder;
 
@@ -8,7 +9,7 @@ import java.util.regex.Pattern;
 
 /**
  * Utility functions to (optionally) store floats and doubles using a IEEE-754 bit masks.
- *
+ * <p>
  * Reference: http://the-witness.net/news/2011/12/engine-tech-concurrent-world-editing/
  */
 public class JsonFloatSerializer {
@@ -17,12 +18,8 @@ public class JsonFloatSerializer {
 	private static final Pattern purePattern = Pattern.compile("^" + fpRegEx + "$");
 	private static final Pattern ieeePattern = Pattern.compile("^0x([a-fA-F0-9]+)\\|" + fpRegEx + "$");
 
-	private static final ThreadLocal<StringBuilder> stringBuilder = new ThreadLocal<StringBuilder>() {
-		@Override
-		protected StringBuilder initialValue() {
-			return new StringBuilder(32);
-		}
-	};
+	private static final ThreadLocal<StringBuilder> stringBuilder =
+			new ThreadLocalInstance<>(() -> new StringBuilder(32));
 
 	public static String encodeFloatBits(float value) {
 

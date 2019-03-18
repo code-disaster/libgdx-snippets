@@ -102,7 +102,6 @@ public class AsyncTask<V extends AsyncTaskJob<V>> {
 		} catch (BrokenBarrierException e) {
 			throw new InterruptedException(e.getMessage());
 		} catch (ExecutionException e) {
-			e.printStackTrace(System.err);
 			throw new RuntimeException("Exception thrown during execution of asynchronous task!", e);
 		}
 	}
