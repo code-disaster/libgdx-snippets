@@ -9,6 +9,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static com.badlogic.gdx.utils.Host.OS.Linux;
 
@@ -217,6 +219,8 @@ public final class FileUtils {
 
 	private static class FileHandleHelper extends FileHandle {
 
+		private static final Pattern relative = Pattern.compile("(/[a-zA-Z0-9\\-_]+/\\.\\.)");
+
 		FileHandleHelper(FileHandle file) {
 			super(file.file(), file.type());
 		}
@@ -226,7 +230,22 @@ public final class FileUtils {
 		}
 
 		FileHandleHelper normalize() {
-			file = file.toPath().normalize().toFile();
+			String path = file.getPath();
+			if (path.startsWith("..")) {
+				throw new IllegalStateException();
+			}
+			// normalize path separators first
+			path = path.replaceAll("\\\\", "/");
+			// extract any "/<folder>/.."
+			for (;;) {
+				Matcher matcher = relative.matcher(path);
+				if (!matcher.find()) {
+					break;
+				}
+				String match = matcher.group(0);
+				path = path.replace(match, "");
+			}
+			file = new File(path);
 			return this;
 		}
 	}
