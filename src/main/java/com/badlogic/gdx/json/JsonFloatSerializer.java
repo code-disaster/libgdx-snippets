@@ -44,7 +44,7 @@ public class JsonFloatSerializer {
 
 		if (matcher.matches()) {
 			String group = matcher.group(1);
-			return Float.intBitsToFloat(Integer.parseUnsignedInt(group, 16));
+			return Float.intBitsToFloat((int) Long.parseLong(group, 16));
 		} else {
 			matcher = purePattern.matcher(value);
 			if (matcher.matches()) {

@@ -34,7 +34,6 @@ fips_begin_sharedlib(gdx-snippets-native)
     endif()
 
     if (FIPS_OSX)
-        fips_deps(gdx-snippets-osx)
         fips_frameworks_osx(OpenGL)
     endif()
 

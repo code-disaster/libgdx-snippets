@@ -5,6 +5,8 @@ import com.badlogic.gdx.graphics.GL33Ext;
 
 public class GdxSnippetsNativesLoader {
 
+	private static boolean nativesLoaded = false;
+
 	/**
 	 * Loads the native library, and (optionally) initializes the flextGL OpenGL bindings.
 	 */
@@ -12,7 +14,7 @@ public class GdxSnippetsNativesLoader {
 
 		try {
 
-			if (loadNativeLibraries) {
+			if (loadNativeLibraries && !nativesLoaded) {
 
 				// customized library name: 32/64 bit shared library on OS X
 
@@ -29,6 +31,8 @@ public class GdxSnippetsNativesLoader {
 				// load native library
 
 				loader.load("gdx-snippets");
+
+				nativesLoaded = true;
 			}
 
 			// initialize flextGL bindings
